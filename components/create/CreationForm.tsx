@@ -1,10 +1,15 @@
 'use client';
 
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useRouter } from 'next/navigation';
 import ThemeSelector from './ThemeSelector';
-import { themes } from '@/lib/themes';
+import { themes, getTheme } from '@/lib/themes';
+
+interface CreationFormProps {
+  activeThemeId: string;
+  onThemeChange: (id: string) => void;
+}
 
 interface FormState {
   partner_name: string;
@@ -14,279 +19,299 @@ interface FormState {
 }
 
 type FormStep = 'recipient' | 'sender' | 'message' | 'theme' | 'confirm';
-
 const STEPS: FormStep[] = ['recipient', 'sender', 'message', 'theme', 'confirm'];
 const MAX_MESSAGE = 500;
 
-export default function CreationForm() {
+const STEP_LABELS: Record<FormStep, string> = {
+  recipient: 'Who receives this?',
+  sender:    'Who is sending?',
+  message:   'Love Canvas',
+  theme:     'Choose the vibe',
+  confirm:   'Seal it forever',
+};
+
+export default function CreationForm({ activeThemeId, onThemeChange }: CreationFormProps) {
   const router = useRouter();
   const [form, setForm] = useState<FormState>({
     partner_name: '',
-    sender_name: '',
-    message: '',
-    theme_id: 'romantic-roses',
+    sender_name:  '',
+    message:      '',
+    theme_id:     activeThemeId,
   });
-
-  const [formStep, setFormStep] = useState<FormStep>('recipient');
-  const [submitState, setSubmitState] = useState<'form' | 'submitting' | 'error'>('form');
-  const [error, setError] = useState('');
-  const [isShaking, setIsShaking] = useState(false);
+  const [formStep,    setFormStep]    = useState<FormStep>('recipient');
+  const [submitState, setSubmitState] = useState<'idle' | 'submitting' | 'error'>('idle');
+  const [error,       setError]       = useState('');
+  const [shaking,     setShaking]     = useState(false);
+  const [focused,     setFocused]     = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement>
-  ) => {
-    const { name, value } = e.target;
-    setForm((prev) => ({ ...prev, [name]: value }));
-  };
-
-  const handleMessageChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    const { value } = e.target;
-    setForm((prev) => ({ ...prev, message: value }));
-
-    // Auto-expand textarea height
-    if (textareaRef.current) {
-      textareaRef.current.style.height = 'auto';
-      textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`;
+  useEffect(() => {
+    if (activeThemeId !== form.theme_id) {
+      setForm(p => ({ ...p, theme_id: activeThemeId }));
     }
-  };
+  }, [activeThemeId, form.theme_id]);
 
-  const isNextDisabled = () => {
-    if (formStep === 'recipient') return form.partner_name.trim().length === 0;
-    if (formStep === 'sender') return form.sender_name.trim().length === 0;
-    if (formStep === 'message') return form.message.trim().length === 0;
+  const theme     = getTheme(form.theme_id);
+  const stepIndex = STEPS.indexOf(formStep);
+
+  const isDisabled = () => {
+    if (formStep === 'recipient') return !form.partner_name.trim();
+    if (formStep === 'sender')    return !form.sender_name.trim();
+    if (formStep === 'message')   return !form.message.trim();
     return false;
   };
 
-  const handleNext = () => {
-    const idx = STEPS.indexOf(formStep);
-    if (idx < STEPS.length - 1) {
-      setFormStep(STEPS[idx + 1]);
-    }
+  const next = () => stepIndex < STEPS.length - 1 && setFormStep(STEPS[stepIndex + 1]);
+  const back = () => stepIndex > 0 && setFormStep(STEPS[stepIndex - 1]);
+
+  const onKey = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') { e.preventDefault(); if (!isDisabled()) next(); }
   };
 
-  const handleBack = () => {
-    const idx = STEPS.indexOf(formStep);
-    if (idx > 0) {
-      setFormStep(STEPS[idx - 1]);
-    }
+  const onTextarea = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setForm(p => ({ ...p, message: e.target.value }));
+    const el = textareaRef.current;
+    if (el) { el.style.height = 'auto'; el.style.height = `${el.scrollHeight}px`; }
   };
 
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') {
-      e.preventDefault();
-      if (!isNextDisabled()) {
-        handleNext();
-      }
-    }
-  };
-
-  const handleRelease = async (e: React.FormEvent) => {
+  const submit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsShaking(true);
-    setTimeout(() => setIsShaking(false), 500);
-
-    // Trigger phone vibration if available
-    if (typeof navigator !== 'undefined' && navigator.vibrate) {
-      navigator.vibrate([30, 50, 30]);
-    }
-
-    setSubmitState('submitting');
-    setError('');
-
+    setShaking(true); setTimeout(() => setShaking(false), 420);
+    navigator.vibrate?.([30, 50, 30]);
+    setSubmitState('submitting'); setError('');
     try {
-      const res = await fetch('/api/moments', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(form),
-      });
-
+      const res  = await fetch('/api/moments', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(form) });
       const data = await res.json();
-
-      if (!res.ok) {
-        setError(data.error ?? 'Something went wrong.');
-        setSubmitState('error');
-        return;
-      }
-
-      router.push(`/create/success?slug=${data.slug}`);
-    } catch {
-      setError('Could not reach the server. Please try again.');
-      setSubmitState('error');
-    }
+      if (!res.ok) { setError(data.error ?? 'Something went wrong.'); setSubmitState('error'); return; }
+      router.push(`/create/success?slug=${data.slug}&theme=${form.theme_id}`);
+    } catch { setError('Could not reach the server.'); setSubmitState('error'); }
   };
 
-  // Framer Motion transition variants for builder steps
-  const stepVariants = {
-    initial: { opacity: 0, x: 25 },
-    animate: { opacity: 1, x: 0, transition: { duration: 0.6, ease: [0.16, 1, 0.3, 1] as const } },
-    exit: { opacity: 0, x: -25, transition: { duration: 0.3 } }
+  const stepV = {
+    initial: { opacity: 0, y: 12  },
+    animate: { opacity: 1, y: 0,  transition: { duration: 0.42, ease: [0.16, 1, 0.3, 1] as const } },
+    exit:    { opacity: 0, y: -10, transition: { duration: 0.2 } },
   };
+
+  /* ─── shared input underline style ─── */
+  const underlineInput =
+    'w-full bg-transparent border-b text-center font-display text-3xl sm:text-4xl font-light text-white py-3 focus:outline-none placeholder:text-white/18 transition-all duration-300';
+
+  /* ─── primary pill button style ─── */
+  const pillStyle = (disabled = false): React.CSSProperties => ({
+    backgroundColor: disabled ? 'rgba(255,255,255,0.07)' : theme.palette.primary,
+    boxShadow:       disabled ? 'none' : `0 6px 22px ${theme.palette.primary}45`,
+    color:           '#fff',
+    transition:      'all 0.3s ease',
+  });
 
   return (
     <motion.div
-      animate={isShaking ? { x: [-6, 6, -6, 6, 0] } : {}}
-      transition={{ duration: 0.4 }}
-      className="space-y-8"
+      animate={shaking ? { x: [-5, 5, -4, 4, 0] } : {}}
+      transition={{ duration: 0.35 }}
+      className="w-full flex flex-col items-center gap-10"
     >
-      {/* Delicate Horizontal Progress Indicator */}
-      <div className="flex justify-between items-center gap-2 mb-10 max-w-xs mx-auto">
-        {STEPS.map((s, idx) => {
-          const isCompleted = STEPS.indexOf(formStep) > idx;
-          const isActive = formStep === s;
-          return (
-            <div key={s} className="flex-1 h-1 relative bg-charcoal-800 rounded-full overflow-hidden">
+      {/* ── Progress dots + step label ── */}
+      <div className="flex flex-col items-center gap-3 w-full">
+        <div className="flex items-center gap-2">
+          {STEPS.map((s, i) => {
+            const done   = stepIndex > i;
+            const active = formStep === s;
+            return (
               <motion.div
-                className="absolute inset-0 bg-crimson"
-                initial={{ width: 0 }}
-                animate={{ width: isActive || isCompleted ? '100%' : '0%' }}
-                transition={{ duration: 0.5, ease: 'easeInOut' }}
+                key={s}
+                animate={{ width: active ? 36 : 10 }}
+                transition={{ duration: 0.35, ease: 'easeInOut' }}
+                className="h-2 rounded-full"
+                style={{
+                  backgroundColor: done || active ? theme.palette.primary : 'rgba(255,255,255,0.12)',
+                  boxShadow: active ? `0 0 14px ${theme.palette.primary}` : 'none',
+                }}
               />
-            </div>
-          );
-        })}
+            );
+          })}
+        </div>
+        <p
+          className="font-body text-[9px] tracking-[0.3em] uppercase transition-colors duration-700"
+          style={{ color: theme.palette.primary }}
+        >
+          {STEP_LABELS[formStep]}
+        </p>
       </div>
 
-      {/* Multi-step Builder Form Canvas */}
-      <form onSubmit={handleRelease} noValidate>
+      {/* ── Step content ── */}
+      <form
+        onSubmit={submit}
+        noValidate
+        className="w-full flex flex-col items-center gap-8"
+      >
         <AnimatePresence mode="wait">
+
+          {/* Step 1 — Recipient */}
           {formStep === 'recipient' && (
-            <motion.div
-              key="recipient"
-              variants={stepVariants}
-              initial="initial"
-              animate="animate"
-              exit="exit"
-              className="space-y-6 text-center"
+            <motion.div key="recipient" variants={stepV} initial="initial" animate="animate" exit="exit"
+              className="flex flex-col items-center gap-7 w-full text-center"
             >
-              <h2 className="font-display text-2xl sm:text-3xl font-light text-white tracking-wide">
+              <h2 className="font-display text-3xl sm:text-4xl font-light text-white leading-tight">
                 Who is this moment for?
               </h2>
-              <div className="relative max-w-sm mx-auto">
+              <div className="relative w-full" style={{ maxWidth: 340 }}>
                 <input
-                  type="text"
-                  name="partner_name"
-                  value={form.partner_name}
-                  onChange={handleChange}
-                  onKeyDown={handleKeyDown}
-                  placeholder="Their name or nickname"
-                  maxLength={50}
-                  autoFocus
-                  required
-                  className="w-full bg-transparent border-b border-charcoal-700 text-center font-display text-3xl font-light py-3 text-white focus:outline-none focus:border-crimson focus:shadow-[0_4px_24px_rgba(196,12,48,0.1)] transition-all duration-500 placeholder:text-charcoal-600"
+                  type="text" name="partner_name"
+                  value={form.partner_name} onChange={e => setForm(p => ({ ...p, partner_name: e.target.value }))}
+                  onKeyDown={onKey} onFocus={() => setFocused(true)} onBlur={() => setFocused(false)}
+                  placeholder="Their name" maxLength={50} autoFocus required
+                  className={underlineInput}
+                  style={{ borderColor: focused ? theme.palette.primary : 'rgba(255,255,255,0.12)' }}
                 />
+                {/* Glow on focus */}
+                {focused && (
+                  <motion.div
+                    layoutId="input-glow"
+                    className="absolute -bottom-px left-0 right-0 h-px"
+                    style={{ background: `linear-gradient(90deg, transparent, ${theme.palette.primary}, transparent)` }}
+                    initial={{ scaleX: 0 }} animate={{ scaleX: 1 }} transition={{ duration: 0.3 }}
+                  />
+                )}
               </div>
             </motion.div>
           )}
 
+          {/* Step 2 — Sender */}
           {formStep === 'sender' && (
-            <motion.div
-              key="sender"
-              variants={stepVariants}
-              initial="initial"
-              animate="animate"
-              exit="exit"
-              className="space-y-6 text-center"
+            <motion.div key="sender" variants={stepV} initial="initial" animate="animate" exit="exit"
+              className="flex flex-col items-center gap-7 w-full text-center"
             >
-              <h2 className="font-display text-2xl sm:text-3xl font-light text-white tracking-wide">
+              <h2 className="font-display text-3xl sm:text-4xl font-light text-white leading-tight">
                 Who is sending this moment?
               </h2>
-              <div className="relative max-w-sm mx-auto">
+              <div className="relative w-full" style={{ maxWidth: 340 }}>
                 <input
-                  type="text"
-                  name="sender_name"
-                  value={form.sender_name}
-                  onChange={handleChange}
-                  onKeyDown={handleKeyDown}
-                  placeholder="Your name"
-                  maxLength={50}
-                  autoFocus
-                  required
-                  className="w-full bg-transparent border-b border-charcoal-700 text-center font-display text-3xl font-light py-3 text-white focus:outline-none focus:border-crimson focus:shadow-[0_4px_24px_rgba(196,12,48,0.1)] transition-all duration-500 placeholder:text-charcoal-600"
+                  type="text" name="sender_name"
+                  value={form.sender_name} onChange={e => setForm(p => ({ ...p, sender_name: e.target.value }))}
+                  onKeyDown={onKey} onFocus={() => setFocused(true)} onBlur={() => setFocused(false)}
+                  placeholder="Your name" maxLength={50} autoFocus required
+                  className={underlineInput}
+                  style={{ borderColor: focused ? theme.palette.primary : 'rgba(255,255,255,0.12)' }}
                 />
+                {focused && (
+                  <motion.div
+                    layoutId="input-glow"
+                    className="absolute -bottom-px left-0 right-0 h-px"
+                    style={{ background: `linear-gradient(90deg, transparent, ${theme.palette.primary}, transparent)` }}
+                    initial={{ scaleX: 0 }} animate={{ scaleX: 1 }} transition={{ duration: 0.3 }}
+                  />
+                )}
               </div>
             </motion.div>
           )}
 
+          {/* Step 3 — Message */}
           {formStep === 'message' && (
-            <motion.div
-              key="message"
-              variants={stepVariants}
-              initial="initial"
-              animate="animate"
-              exit="exit"
-              className="space-y-6"
+            <motion.div key="message" variants={stepV} initial="initial" animate="animate" exit="exit"
+              className="flex flex-col items-center gap-5 w-full text-center"
             >
-              <div className="text-center">
-                <h2 className="font-display text-2xl sm:text-3xl font-light text-white tracking-wide">
-                  Write what your heart means to say…
-                </h2>
-              </div>
-              <div className="relative p-6 sm:p-8 rounded-2xl bg-charcoal-950/20 border border-charcoal-900 backdrop-blur-md shadow-2xl focus-within:border-crimson/40 focus-within:shadow-[0_0_32px_rgba(196,12,48,0.06)] transition-all duration-500">
+              <h2 className="font-display text-3xl sm:text-4xl font-light text-white leading-tight">
+                Write what your heart says…
+              </h2>
+              <div
+                className="relative w-full rounded-2xl border backdrop-blur-sm px-6 pt-6 pb-4 transition-all duration-400"
+                style={{
+                  background:   'rgba(0,0,0,0.25)',
+                  borderColor:  `${theme.palette.primary}20`,
+                  maxWidth:     440,
+                  boxShadow:    `0 0 30px ${theme.palette.primary}10`,
+                }}
+              >
                 <textarea
-                  name="message"
                   ref={textareaRef}
+                  name="message"
                   value={form.message}
-                  onChange={handleMessageChange}
-                  placeholder="Write your message on this love canvas…"
+                  onChange={onTextarea}
+                  onFocus={() => setFocused(true)}
+                  onBlur={() => setFocused(false)}
+                  placeholder="Your love letter starts here…"
                   maxLength={MAX_MESSAGE}
-                  autoFocus
-                  required
-                  className="w-full bg-transparent text-white font-display text-xl sm:text-2xl font-light leading-relaxed placeholder:text-charcoal-600 focus:outline-none resize-none min-h-[140px]"
+                  autoFocus required
+                  style={{
+                    lineHeight: '1.9rem',
+                    backgroundImage: 'repeating-linear-gradient(to bottom, transparent 0, transparent calc(1.9rem - 1px), rgba(255,255,255,0.04) calc(1.9rem - 1px), rgba(255,255,255,0.04) 1.9rem)',
+                    backgroundSize: '100% 1.9rem',
+                  }}
+                  className="w-full bg-transparent text-white font-display text-xl font-light placeholder:text-white/18 focus:outline-none resize-none min-h-[133px]"
                 />
-                
-                <div className="flex justify-between items-center mt-4 text-[10px] tracking-wider text-ash-500 font-body uppercase">
-                  <span>Love Canvas</span>
-                  <span>{form.message.length} / {MAX_MESSAGE}</span>
+                <div className="flex justify-between items-center border-t border-white/5 pt-3 mt-2">
+                  <span className="font-body text-[9px] tracking-[0.25em] uppercase text-white/25">Love Canvas</span>
+                  <span className="font-body text-[9px] text-white/25">{form.message.length} / {MAX_MESSAGE}</span>
                 </div>
               </div>
             </motion.div>
           )}
 
+          {/* Step 4 — Theme */}
           {formStep === 'theme' && (
-            <motion.div
-              key="theme"
-              variants={stepVariants}
-              initial="initial"
-              animate="animate"
-              exit="exit"
+            <motion.div key="theme" variants={stepV} initial="initial" animate="animate" exit="exit"
+              className="w-full"
             >
+              <div className="text-center mb-6">
+                <h2 className="font-display text-3xl sm:text-4xl font-light text-white leading-tight">
+                  Choose the emotional vibe
+                </h2>
+              </div>
               <ThemeSelector
                 selected={form.theme_id}
-                onChange={(id) => setForm((prev) => ({ ...prev, theme_id: id }))}
+                onChange={id => { onThemeChange(id); setForm(p => ({ ...p, theme_id: id })); }}
               />
             </motion.div>
           )}
 
+          {/* Step 5 — Confirm */}
           {formStep === 'confirm' && (
-            <motion.div
-              key="confirm"
-              variants={stepVariants}
-              initial="initial"
-              animate="animate"
-              exit="exit"
-              className="space-y-6 text-center"
+            <motion.div key="confirm" variants={stepV} initial="initial" animate="animate" exit="exit"
+              className="flex flex-col items-center gap-6 w-full text-center"
             >
-              <h2 className="font-display text-2xl sm:text-3xl font-light text-white tracking-wide">
-                Ready to seal this moment?
+              <h2 className="font-display text-3xl sm:text-4xl font-light text-white leading-tight">
+                Ready to seal this?
               </h2>
-              
-              <div className="p-6 sm:p-8 rounded-2xl bg-charcoal-950/25 border border-charcoal-900/60 backdrop-blur-md max-w-sm mx-auto space-y-6 text-left shadow-xl">
-                <p className="font-body text-[10px] tracking-[0.25em] text-ash-500 uppercase text-center border-b border-charcoal-800 pb-3">
+
+              {/* Keepsake summary card */}
+              <div
+                className="w-full rounded-2xl border backdrop-blur-md px-7 py-6 flex flex-col items-center gap-5 relative overflow-hidden"
+                style={{
+                  background:  'rgba(0,0,0,0.30)',
+                  borderColor: `${theme.palette.primary}22`,
+                  maxWidth:    360,
+                  boxShadow:   `0 0 40px ${theme.palette.primary}12`,
+                }}
+              >
+                <p className="font-body text-[9px] tracking-[0.35em] uppercase text-white/28 w-full text-center border-b border-white/5 pb-4">
                   Keepsake Summary
                 </p>
-                <div className="space-y-1">
-                  <span className="font-body text-[10px] tracking-wider text-ash-500 uppercase">For</span>
-                  <p className="font-display text-xl text-white font-light">{form.partner_name}</p>
+
+                <div className="flex flex-col items-center gap-1">
+                  <span className="font-body text-[8px] tracking-[0.3em] uppercase text-white/28">For</span>
+                  <p className="font-display text-2xl text-white font-light">{form.partner_name}</p>
                 </div>
-                <div className="space-y-1">
-                  <span className="font-body text-[10px] tracking-wider text-ash-500 uppercase">From</span>
-                  <p className="font-display text-lg text-white font-light">{form.sender_name}</p>
+
+                <motion.svg
+                  width="20" height="20" viewBox="0 0 24 24"
+                  fill={theme.palette.primary}
+                  animate={{ scale: [1, 1.3, 1] }}
+                  transition={{ duration: 1.8, repeat: Infinity, ease: 'easeInOut' }}
+                  style={{ filter: `drop-shadow(0 0 8px ${theme.palette.primary})` }}
+                >
+                  <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
+                </motion.svg>
+
+                <div className="flex flex-col items-center gap-1">
+                  <span className="font-body text-[8px] tracking-[0.3em] uppercase text-white/28">From</span>
+                  <p className="font-display text-xl text-white font-light">{form.sender_name}</p>
                 </div>
-                <div className="space-y-1">
-                  <span className="font-body text-[10px] tracking-wider text-ash-500 uppercase">Atmosphere</span>
-                  <p className="font-display text-base text-crimson font-light">
-                    {themes.find((t) => t.id === form.theme_id)?.name}
+
+                <div className="w-full border-t border-white/5 pt-4 flex flex-col items-center gap-1">
+                  <span className="font-body text-[8px] tracking-[0.3em] uppercase text-white/28">Atmosphere</span>
+                  <p className="font-display text-base font-light" style={{ color: theme.palette.accent }}>
+                    {themes.find(t => t.id === form.theme_id)?.name}
                   </p>
                 </div>
               </div>
@@ -294,87 +319,68 @@ export default function CreationForm() {
           )}
         </AnimatePresence>
 
-        {/* Builder Step Controls */}
-        <div className="flex justify-between items-center gap-4 mt-10">
-          {formStep !== 'recipient' ? (
-            <button
-              type="button"
-              onClick={handleBack}
-              disabled={submitState === 'submitting'}
-              className="px-6 py-3 border border-charcoal-700/60 text-ash-300 font-body text-xs tracking-widest uppercase hover:text-white hover:border-ash-400 transition-all duration-300 disabled:opacity-30"
-            >
-              Back
-            </button>
-          ) : (
-            <div />
-          )}
-
+        {/* ── Navigation ── */}
+        <div className="flex flex-col items-center gap-3 w-full">
+          {/* Primary action — centered pill, auto-width on desktop, wider on mobile */}
           {formStep !== 'confirm' ? (
-            <button
+            <motion.button
               type="button"
-              onClick={handleNext}
-              disabled={isNextDisabled()}
-              className="px-8 py-3 bg-charcoal-800 text-white font-body text-xs tracking-widest uppercase hover:bg-charcoal-700 transition-all duration-300 disabled:opacity-30 disabled:cursor-not-allowed"
+              onClick={next}
+              disabled={isDisabled()}
+              whileHover={!isDisabled() ? { scale: 1.04 } : {}}
+              whileTap={!isDisabled() ? { scale: 0.97 } : {}}
+              className="px-10 py-3.5 rounded-full font-body text-[10px] tracking-[0.3em] uppercase disabled:cursor-not-allowed transition-opacity duration-300"
+              style={pillStyle(isDisabled())}
             >
               Continue
-            </button>
+            </motion.button>
           ) : (
             <motion.button
               id="btn-create-moment"
               type="submit"
               disabled={submitState === 'submitting'}
-              whileHover={{ scale: 1.025 }}
-              whileTap={{ scale: 0.98 }}
-              className="group relative px-8 py-4 bg-crimson text-white font-body text-xs tracking-widest uppercase overflow-hidden transition-all duration-500 hover:bg-rose disabled:opacity-50 disabled:cursor-not-allowed"
-              animate={{
-                boxShadow: [
-                  '0 0 12px rgba(196,12,48,0.25)',
-                  '0 0 28px rgba(196,12,48,0.55)',
-                  '0 0 12px rgba(196,12,48,0.25)'
-                ]
-              }}
-              transition={{
-                duration: 2.5,
-                repeat: Infinity,
-                ease: 'easeInOut'
-              }}
+              whileHover={{ scale: 1.04 }}
+              whileTap={{ scale: 0.97 }}
+              className="px-10 py-3.5 rounded-full font-body text-[10px] tracking-[0.3em] uppercase disabled:cursor-not-allowed"
+              style={pillStyle(submitState === 'submitting')}
             >
               <AnimatePresence mode="wait">
                 {submitState === 'submitting' ? (
-                  <motion.span
-                    key="releasing"
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    className="flex items-center justify-center gap-2"
+                  <motion.span key="loading" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+                    className="flex items-center gap-2"
                   >
-                    <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                    Sealing Keepsake…
+                    <span className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                    Sealing keepsake…
                   </motion.span>
                 ) : (
-                  <motion.span
-                    key="release"
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                  >
+                  <motion.span key="label" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
                     Release this moment
                   </motion.span>
                 )}
               </AnimatePresence>
             </motion.button>
           )}
+
+          {/* Back — ghost text link, only when not on first step */}
+          {formStep !== 'recipient' && (
+            <button
+              type="button"
+              onClick={back}
+              disabled={submitState === 'submitting'}
+              className="font-body text-[9px] tracking-[0.25em] uppercase text-white/28 hover:text-white/55 transition-colors duration-300 disabled:opacity-20 py-1"
+            >
+              ← Back
+            </button>
+          )}
         </div>
       </form>
 
-      {/* Submission Errors */}
+      {/* Error message */}
       <AnimatePresence>
         {submitState === 'error' && error && (
           <motion.p
-            initial={{ opacity: 0, y: -8 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0 }}
-            className="font-body text-sm text-rose-500 text-center mt-4"
+            initial={{ opacity: 0, y: -4 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
+            className="font-body text-xs text-rose-400 text-center"
           >
             {error}
           </motion.p>

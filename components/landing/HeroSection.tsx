@@ -1,18 +1,67 @@
 'use client';
 
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
 import RoseLineArt from './RoseLineArt';
+import AtmosphereLayer from '../moment/AtmosphereLayer';
+import { useState, useEffect } from 'react';
+
+// Subtle crimson atmosphere for the landing page
+const HERO_THEME_ENGINE = {
+  particleDensity: 'low' as const,
+  motionBehavior:  'fall' as const,
+  backgroundLayer: 'gradient' as const,
+  emotionalIntensity: 'soft' as const,
+  particleShape:   'petal' as const,
+};
+
+const HERO_PALETTE = {
+  primary:   '#c41230',
+  secondary: '#8b0a1f',
+  accent:    '#e8184f',
+};
 
 export default function HeroSection() {
+  const [showAtmosphere, setShowAtmosphere] = useState(false);
+
+  // Delay atmosphere so it doesn't compete with the initial page-load FCP
+  useEffect(() => {
+    const t = setTimeout(() => setShowAtmosphere(true), 1200);
+    return () => clearTimeout(t);
+  }, []);
+
   return (
     <section className="relative min-h-screen flex flex-col items-center justify-center overflow-hidden bg-void px-6">
+
+      {/* Live particle atmosphere (delayed for performance) */}
+      <AnimatePresence>
+        {showAtmosphere && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 2.5, ease: 'easeOut' }}
+            className="absolute inset-0 z-0 pointer-events-none"
+          >
+            <AtmosphereLayer themeEngine={HERO_THEME_ENGINE} palette={HERO_PALETTE} />
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* Atmospheric radial glow */}
       <div
-        className="atmosphere absolute inset-0 pointer-events-none"
+        className="atmosphere absolute inset-0 pointer-events-none z-0"
         style={{
           background:
             'radial-gradient(ellipse 60% 50% at 50% 50%, rgba(196,18,48,0.06) 0%, transparent 70%)',
+        }}
+        aria-hidden="true"
+      />
+
+      {/* Vignette edges */}
+      <div
+        className="absolute inset-0 pointer-events-none z-0"
+        style={{
+          background: 'radial-gradient(ellipse 100% 100% at 50% 50%, transparent 40%, rgba(10,10,10,0.7) 100%)',
         }}
         aria-hidden="true"
       />
@@ -22,11 +71,12 @@ export default function HeroSection() {
 
       {/* Content */}
       <div className="relative z-10 text-center max-w-2xl mx-auto flex flex-col items-center">
+
         {/* Eyebrow */}
         <motion.p
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 1, delay: 0.8 }}
+          transition={{ duration: 0.9, delay: 0.6, ease: [0.16, 1, 0.3, 1] }}
           className="font-body text-xs tracking-[0.3em] uppercase text-crimson mb-8"
         >
           lovethatneverfades
@@ -36,7 +86,7 @@ export default function HeroSection() {
         <motion.h1
           initial={{ opacity: 0, y: 24 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 1.4, delay: 1.2, ease: [0.16, 1, 0.3, 1] }}
+          transition={{ duration: 1.2, delay: 1.0, ease: [0.16, 1, 0.3, 1] }}
           className="font-display text-5xl sm:text-6xl md:text-7xl font-light leading-[1.1] text-white mb-6"
         >
           Create a digital moment
@@ -48,20 +98,20 @@ export default function HeroSection() {
         <motion.p
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 1.2, delay: 1.8, ease: [0.16, 1, 0.3, 1] }}
+          transition={{ duration: 1.0, delay: 1.5, ease: [0.16, 1, 0.3, 1] }}
           className="font-body text-base sm:text-lg text-ash-300 font-light leading-relaxed mb-16 max-w-md mx-auto"
         >
           For a love that never does.
         </motion.p>
 
-        {/* Single Premium CTA */}
+        {/* CTA */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 1, delay: 2.4, ease: [0.16, 1, 0.3, 1] }}
+          transition={{ duration: 0.9, delay: 2.0, ease: [0.16, 1, 0.3, 1] }}
           className="flex flex-col items-center gap-5"
         >
-          {/* Button */}
+          {/* Pulsing button wrapper */}
           <motion.div
             animate={{
               boxShadow: [
@@ -109,11 +159,11 @@ export default function HeroSection() {
             </Link>
           </motion.div>
 
-          {/* Scarcity micro-label below the button */}
+          {/* Scarcity micro-label */}
           <motion.p
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            transition={{ duration: 1, delay: 3.2 }}
+            transition={{ duration: 1, delay: 2.8 }}
             className="font-body text-[10px] tracking-[0.25em] uppercase text-ash-500"
           >
             Each link fades after 10 views. No exceptions.
@@ -123,7 +173,7 @@ export default function HeroSection() {
 
       {/* Bottom fade */}
       <div
-        className="absolute bottom-0 left-0 right-0 h-32 pointer-events-none"
+        className="absolute bottom-0 left-0 right-0 h-32 pointer-events-none z-10"
         style={{
           background: 'linear-gradient(to top, #0a0a0a, transparent)',
         }}

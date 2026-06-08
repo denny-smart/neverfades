@@ -45,11 +45,11 @@ export default function RevealSequence({ moment }: RevealSequenceProps) {
   // Step advancement timer engine
   useEffect(() => {
     const stepDelays: Record<number, number> = {
-      [STEP_SILENCE]:    1800,                       // initial silence
-      [STEP_INTRO]:      3200,                       // intro message
-      [STEP_NAME]:       0,                          // typewriter callbacks advance this
-      [STEP_PAUSE]:      pacing.pauseBetweenSteps,   // emotional pause
-      [STEP_SIGNATURE]:  3200,                       // signature view before branding
+      [STEP_SILENCE]:    700,                           // initial silence
+      [STEP_INTRO]:      1600,                          // intro message
+      [STEP_NAME]:       0,                             // typewriter callbacks advance this
+      [STEP_PAUSE]:      Math.min(pacing.pauseBetweenSteps, 800), // capped pause
+      [STEP_SIGNATURE]:  2000,                          // signature view before branding
     };
 
     if (
@@ -67,8 +67,8 @@ export default function RevealSequence({ moment }: RevealSequenceProps) {
     if (step !== STEP_MESSAGE) return;
 
     const totalLines = lines.length;
-    const revealTimeMs = (totalLines - 1) * 1600 + 1400; // staggered anim duration
-    const readingDelayMs = Math.max(3000, lines[totalLines - 1]?.split(' ').length * 320 || 3000);
+    const revealTimeMs = (totalLines - 1) * 700 + 600;  // snappy stagger
+    const readingDelayMs = Math.max(1400, (lines[totalLines - 1]?.split(' ').length ?? 5) * 150);
     const totalDuration = revealTimeMs + readingDelayMs;
 
     const t = setTimeout(() => setStep(STEP_SIGNATURE), totalDuration);
@@ -78,20 +78,20 @@ export default function RevealSequence({ moment }: RevealSequenceProps) {
   // Trigger ambient background elements
   useEffect(() => {
     if (step !== STEP_ATMOSPHERE) return;
-    const t = setTimeout(() => setAtmosphereActive(true), 800);
+    const t = setTimeout(() => setAtmosphereActive(true), 350);
     return () => clearTimeout(t);
   }, [step]);
 
   const fadeIn = {
     hidden:  { opacity: 0 },
-    visible: { opacity: 1, transition: { duration: 1.6, ease: [0.16, 1, 0.3, 1] as const } },
-    exit:    { opacity: 0, transition: { duration: 0.8 } },
+    visible: { opacity: 1, transition: { duration: 0.7, ease: [0.16, 1, 0.3, 1] as const } },
+    exit:    { opacity: 0, transition: { duration: 0.4 } },
   };
 
   const fadeUp = {
-    hidden:  { opacity: 0, y: 32 },
-    visible: { opacity: 1, y: 0, transition: { duration: 1.4, ease: [0.16, 1, 0.3, 1] as const } },
-    exit:    { opacity: 0, y: -10, transition: { duration: 0.7 } },
+    hidden:  { opacity: 0, y: 18 },
+    visible: { opacity: 1, y: 0, transition: { duration: 0.65, ease: [0.16, 1, 0.3, 1] as const } },
+    exit:    { opacity: 0, y: -8, transition: { duration: 0.35 } },
   };
 
   // Staggered lines variants
@@ -99,17 +99,19 @@ export default function RevealSequence({ moment }: RevealSequenceProps) {
     hidden: {},
     visible: {
       transition: {
-        staggerChildren: 1.6,
+        staggerChildren: 0.55,
+        delayChildren: 0.1,
       }
     }
   };
 
   const lineVariants = {
-    hidden: { opacity: 0, y: 15 },
+    hidden: { opacity: 0, y: 10, filter: 'blur(4px)' },
     visible: { 
       opacity: 1, 
       y: 0, 
-      transition: { duration: 1.2, ease: [0.16, 1, 0.3, 1] as const } 
+      filter: 'blur(0px)',
+      transition: { duration: 0.55, ease: [0.16, 1, 0.3, 1] as const } 
     }
   };
 
@@ -117,15 +119,15 @@ export default function RevealSequence({ moment }: RevealSequenceProps) {
   const signatureVariants = {
     hidden: { 
       opacity: 0, 
-      scale: 0.9, 
-      filter: 'blur(8px)' 
+      scale: 0.95, 
+      filter: 'blur(6px)' 
     },
     visible: {
       opacity: 1,
       scale: 1,
       filter: 'blur(0px)',
       transition: {
-        duration: 2.0,
+        duration: 0.85,
         ease: [0.16, 1, 0.3, 1] as const
       }
     }
@@ -151,7 +153,7 @@ export default function RevealSequence({ moment }: RevealSequenceProps) {
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            transition={{ duration: 2.5 }}
+            transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
             className="absolute inset-0 z-0"
           >
             <AtmosphereLayer
@@ -169,7 +171,7 @@ export default function RevealSequence({ moment }: RevealSequenceProps) {
             key="silence"
             initial={{ opacity: 1 }}
             animate={{ opacity: 1 }}
-            exit={{ opacity: 0, transition: { duration: 1.2 } }}
+            exit={{ opacity: 0, transition: { duration: 0.6 } }}
             className="absolute inset-0 bg-void z-20"
             aria-hidden="true"
           />
@@ -236,11 +238,11 @@ export default function RevealSequence({ moment }: RevealSequenceProps) {
               >
                 <TypewriterText
                   text={moment.partner_name}
-                  speed={pacing.typingSpeed}
-                  delay={0.3}
+                  speed={Math.min(pacing.typingSpeed, 50)}
+                  delay={0.1}
                   onComplete={() => {
                     if (step === STEP_NAME) {
-                      setTimeout(() => setStep(STEP_PAUSE), 600);
+                      setTimeout(() => setStep(STEP_PAUSE), 250);
                     }
                   }}
                 />
@@ -365,8 +367,8 @@ export default function RevealSequence({ moment }: RevealSequenceProps) {
             <motion.p
               key="brand"
               initial={{ opacity: 0 }}
-              animate={{ opacity: 0.5 }}
-              transition={{ duration: 2.2, delay: 2.2 }}
+              animate={{ opacity: 0.45 }}
+              transition={{ duration: 0.9, delay: 1.0, ease: [0.16, 1, 0.3, 1] }}
               className="font-body text-[9px] tracking-[0.38em] uppercase text-ash-400 pt-10 w-full"
             >
               lovethatneverfades

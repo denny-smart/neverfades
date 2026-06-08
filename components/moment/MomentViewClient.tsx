@@ -119,16 +119,54 @@ export default function MomentViewClient({
   // ─── Loading state ───────────────────────────────────────────────────────
   if (loading) {
     return (
-      <div className="min-h-screen bg-void flex items-center justify-center">
+      <div className="min-h-screen bg-void flex flex-col items-center justify-center gap-8 relative overflow-hidden">
+        {/* Soft radial glow */}
+        <div
+          className="absolute inset-0 pointer-events-none"
+          style={{
+            background: 'radial-gradient(ellipse 55% 45% at 50% 50%, rgba(196,18,48,0.05) 0%, transparent 70%)',
+          }}
+          aria-hidden="true"
+        />
+
+        {/* Breathing pulse trio */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          transition={{ duration: 1.5 }}
-          className="text-center"
+          transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
+          className="flex items-center gap-3"
         >
-          <div className="w-5 h-5 border border-crimson/30 border-t-crimson rounded-full animate-spin mx-auto mb-6" />
-          <p className="font-body text-[10px] tracking-[0.3em] uppercase text-ash-400">
+          {[0, 1, 2].map((i) => (
+            <motion.div
+              key={i}
+              className="w-1.5 h-1.5 rounded-full bg-crimson"
+              animate={{
+                opacity: [0.15, 0.85, 0.15],
+                scale:   [0.85, 1.2,  0.85],
+              }}
+              transition={{
+                duration: 1.6,
+                delay:    i * 0.28,
+                repeat:   Infinity,
+                ease:     'easeInOut',
+              }}
+              style={{ boxShadow: '0 0 8px rgba(196,18,48,0.6)' }}
+            />
+          ))}
+        </motion.div>
+
+        {/* Poetic loading copy */}
+        <motion.div
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 1.0, delay: 0.5, ease: [0.16, 1, 0.3, 1] }}
+          className="text-center flex flex-col items-center gap-2"
+        >
+          <p className="font-body text-[10px] tracking-[0.38em] uppercase text-ash-400">
             A moment is unfolding…
+          </p>
+          <p className="font-display text-sm text-white/18 italic font-light">
+            Something was created just for you
           </p>
         </motion.div>
       </div>

@@ -4,7 +4,7 @@ import { useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
 
-// ─── Floating ash particle for the faded canvas ──────────────────────────
+// ─── Ash particle canvas ─────────────────────────────────────────────────────
 interface AshParticle {
   x: number;
   y: number;
@@ -16,27 +16,29 @@ interface AshParticle {
   maxLife: number;
   rotation: number;
   rotationSpeed: number;
+  windPhase: number;
 }
 
 function createAsh(canvas: HTMLCanvasElement): AshParticle {
   return {
-    x: Math.random() * canvas.width,
-    y: -10,
-    vx: (Math.random() - 0.5) * 0.5,
-    vy: Math.random() * 0.4 + 0.2,
-    size: Math.random() * 3 + 1,
-    opacity: Math.random() * 0.35 + 0.05,
-    life: 0,
-    maxLife: Math.random() * 400 + 200,
-    rotation: Math.random() * Math.PI * 2,
-    rotationSpeed: (Math.random() - 0.5) * 0.02,
+    x:             Math.random() * canvas.width,
+    y:             -10,
+    vx:            (Math.random() - 0.5) * 0.4,
+    vy:            Math.random() * 0.45 + 0.2,
+    size:          Math.random() * 2.5 + 0.8,
+    opacity:       Math.random() * 0.28 + 0.04,
+    life:          0,
+    maxLife:       Math.random() * 500 + 250,
+    rotation:      Math.random() * Math.PI * 2,
+    rotationSpeed: (Math.random() - 0.5) * 0.015,
+    windPhase:     Math.random() * Math.PI * 2,
   };
 }
 
 function AshCanvas() {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const canvasRef    = useRef<HTMLCanvasElement>(null);
   const particlesRef = useRef<AshParticle[]>([]);
-  const rafRef = useRef<number>(0);
+  const rafRef       = useRef<number>(0);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -45,15 +47,17 @@ function AshCanvas() {
     if (!ctx) return;
 
     const resize = () => {
-      canvas.width = window.innerWidth;
+      canvas.width  = window.innerWidth;
       canvas.height = window.innerHeight;
     };
     resize();
     window.addEventListener('resize', resize);
 
-    for (let i = 0; i < 40; i++) {
-      const p = createAsh(canvas);
-      p.life = Math.random() * p.maxLife;
+    // Pre-scatter initial particles across the whole screen
+    for (let i = 0; i < 55; i++) {
+      const p    = createAsh(canvas);
+      p.life     = Math.random() * p.maxLife;
+      p.y        = Math.random() * canvas.height;
       particlesRef.current.push(p);
     }
 
@@ -62,26 +66,27 @@ function AshCanvas() {
 
       particlesRef.current = particlesRef.current.filter((p) => {
         p.life++;
-        p.x += p.vx;
-        p.y += p.vy;
+        p.x        += p.vx + Math.sin(p.life * 0.012 + p.windPhase) * 0.55;
+        p.y        += p.vy;
         p.rotation += p.rotationSpeed;
 
         const lifeRatio = p.life / p.maxLife;
-        const alpha = p.opacity * Math.sin(lifeRatio * Math.PI);
+        const alpha     = p.opacity * Math.sin(lifeRatio * Math.PI);
 
         ctx.save();
         ctx.translate(p.x, p.y);
         ctx.rotate(p.rotation);
         ctx.globalAlpha = Math.max(0, alpha);
-        // Draw a soft rectangular flake
-        ctx.fillStyle = '#c41230';
-        ctx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size * 0.5);
+        ctx.fillStyle   = '#c41230';
+
+        // Soft rectangular ash flake
+        ctx.fillRect(-p.size / 2, -p.size * 0.35, p.size, p.size * 0.7);
         ctx.restore();
 
-        return p.life < p.maxLife;
+        return p.life < p.maxLife && p.y < canvas.height + 20;
       });
 
-      while (particlesRef.current.length < 40) {
+      while (particlesRef.current.length < 55) {
         particlesRef.current.push(createAsh(canvas));
       }
 
@@ -106,15 +111,68 @@ function AshCanvas() {
   );
 }
 
+// ─── Animated broken-heart SVG ───────────────────────────────────────────────
+function BrokenHeartIcon() {
+  return (
+    <svg width="52" height="48" viewBox="0 0 52 48" fill="none" aria-hidden="true">
+      {/* Left half */}
+      <motion.path
+        d="M26 44C26 44 3 29.5 3 14C3 7.37 8.37 2 15 2C19.18 2 22.86 4.14 25 7.37"
+        stroke="#c41230"
+        strokeWidth="2"
+        strokeLinecap="round"
+        fill="none"
+        initial={{ pathLength: 0, opacity: 0 }}
+        animate={{ pathLength: 1, opacity: 1 }}
+        transition={{ duration: 1.4, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
+      />
+      {/* Right half — slightly offset for broken feel */}
+      <motion.path
+        d="M28 44C28 44 49 29.5 49 14C49 7.37 43.63 2 37 2C32.82 2 29.14 4.14 27 7.37"
+        stroke="#8b0a1f"
+        strokeWidth="2"
+        strokeLinecap="round"
+        fill="none"
+        initial={{ pathLength: 0, opacity: 0 }}
+        animate={{ pathLength: 1, opacity: 0.65 }}
+        transition={{ duration: 1.4, delay: 0.5, ease: [0.16, 1, 0.3, 1] }}
+      />
+      {/* Crack / break line */}
+      <motion.path
+        d="M26 44L24 30L28 22L23 14L28 7"
+        stroke="#c41230"
+        strokeWidth="1"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        fill="none"
+        initial={{ pathLength: 0, opacity: 0 }}
+        animate={{ pathLength: 1, opacity: 0.5 }}
+        transition={{ duration: 0.9, delay: 1.2, ease: 'easeOut' }}
+      />
+    </svg>
+  );
+}
+
+// ─── Component ────────────────────────────────────────────────────────────────
 export default function FadedScreen() {
   return (
     <div className="min-h-screen bg-void flex flex-col items-center justify-center px-6 relative overflow-hidden">
-      {/* Dark atmospheric vignette */}
+
+      {/* Deep vignette glow */}
       <div
         className="absolute inset-0 pointer-events-none"
         style={{
           background:
-            'radial-gradient(ellipse 70% 60% at 50% 50%, rgba(196,18,48,0.03) 0%, #0a0a0a 75%)',
+            'radial-gradient(ellipse 70% 60% at 50% 40%, rgba(196,18,48,0.04) 0%, #0a0a0a 70%)',
+        }}
+        aria-hidden="true"
+      />
+
+      {/* Edge darkening */}
+      <div
+        className="absolute inset-0 pointer-events-none"
+        style={{
+          background: 'radial-gradient(ellipse 100% 100% at 50% 50%, transparent 40%, rgba(0,0,0,0.72) 100%)',
         }}
         aria-hidden="true"
       />
@@ -122,80 +180,111 @@ export default function FadedScreen() {
       {/* Falling ash canvas */}
       <AshCanvas />
 
-      <div className="relative z-10 max-w-md w-full text-center">
+      {/* ── Content ── */}
+      <div className="relative z-10 max-w-sm w-full text-center flex flex-col items-center">
+
         {/* Broken heart */}
         <motion.div
-          initial={{ opacity: 0, scale: 0.3 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 2.4, ease: [0.16, 1, 0.3, 1] }}
-          className="text-4xl mb-12"
-          aria-hidden="true"
+          initial={{ opacity: 0, scale: 0.4, y: 8 }}
+          animate={{ opacity: 1, scale: 1, y: 0 }}
+          transition={{ duration: 1.4, ease: [0.16, 1, 0.3, 1] }}
+          className="mb-10"
         >
-          💔
+          <BrokenHeartIcon />
         </motion.div>
 
-        {/* Divider line */}
+        {/* Eyebrow */}
+        <motion.p
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.7, delay: 0.9 }}
+          className="font-body text-[9px] tracking-[0.42em] uppercase text-crimson mb-6"
+        >
+          lovethatneverfades
+        </motion.p>
+
+        {/* Hairline */}
         <motion.div
           initial={{ scaleX: 0 }}
           animate={{ scaleX: 1 }}
-          transition={{ duration: 1.8, delay: 0.8 }}
-          className="h-px bg-charcoal-800 mb-12"
+          transition={{ duration: 1.0, delay: 1.1, ease: [0.16, 1, 0.3, 1] }}
+          className="w-16 h-px mb-8 origin-center"
+          style={{ background: 'linear-gradient(90deg, transparent, rgba(196,18,48,0.5), transparent)' }}
         />
 
         {/* Headline */}
         <motion.h1
-          initial={{ opacity: 0, y: 24 }}
+          initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 1.8, delay: 1.2, ease: [0.16, 1, 0.3, 1] }}
-          className="font-display text-4xl sm:text-5xl font-light text-white mb-8 leading-tight"
+          transition={{ duration: 1.2, delay: 1.3, ease: [0.16, 1, 0.3, 1] }}
+          className="font-display text-4xl sm:text-5xl font-light text-white mb-5 leading-tight"
         >
           This moment has faded
           <br />
           <span className="text-gradient-crimson italic">from the surface.</span>
         </motion.h1>
 
-        {/* Emotional sub-copy */}
+        {/* Sub-copy */}
         <motion.p
-          initial={{ opacity: 0, y: 16 }}
+          initial={{ opacity: 0, y: 14 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 1.6, delay: 2.0, ease: [0.16, 1, 0.3, 1] }}
-          className="font-body text-sm sm:text-base text-ash-300 leading-relaxed mb-14 max-w-sm mx-auto"
+          transition={{ duration: 1.0, delay: 1.85, ease: [0.16, 1, 0.3, 1] }}
+          className="font-body text-sm text-white/35 leading-relaxed mb-12 max-w-xs mx-auto"
         >
-          But it still exists between you both.
+          But it still exists between you both — in the place where things
+          are truly felt.
         </motion.p>
 
         {/* Divider */}
         <motion.div
           initial={{ scaleX: 0 }}
           animate={{ scaleX: 1 }}
-          transition={{ duration: 1.2, delay: 2.8 }}
-          className="h-px bg-charcoal-700 mb-12"
+          transition={{ duration: 0.9, delay: 2.4, ease: [0.16, 1, 0.3, 1] }}
+          className="w-full h-px mb-12 origin-left"
+          style={{ background: 'linear-gradient(90deg, rgba(196,18,48,0.3), transparent)' }}
         />
 
         {/* CTA */}
         <motion.div
-          initial={{ opacity: 0, y: 16 }}
+          initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 1.4, delay: 3.2 }}
+          transition={{ duration: 0.85, delay: 2.7, ease: [0.16, 1, 0.3, 1] }}
+          className="flex flex-col items-center gap-4"
         >
-          <p className="font-body text-[10px] tracking-[0.2em] uppercase text-ash-400 mb-6">
+          <p className="font-body text-[9px] tracking-[0.3em] uppercase text-white/25">
             Pass the feeling forward
           </p>
-          <Link
-            href="/create"
-            id="btn-faded-create"
-            className="inline-flex items-center justify-center px-8 py-4 bg-crimson text-white font-body text-sm tracking-widest uppercase hover:bg-rose glow-crimson transition-all duration-500 min-w-[220px]"
+          <motion.div
+            animate={{
+              boxShadow: [
+                '0 0 18px rgba(196,18,48,0.2)',
+                '0 0 38px rgba(196,18,48,0.45)',
+                '0 0 18px rgba(196,18,48,0.2)',
+              ],
+            }}
+            transition={{ duration: 2.8, repeat: Infinity, ease: 'easeInOut' }}
           >
-            Create your own moment
-          </Link>
+            <Link
+              href="/create"
+              id="btn-faded-create"
+              className="group relative inline-flex items-center justify-center px-10 py-4 bg-crimson text-white font-body text-[11px] tracking-[0.28em] uppercase overflow-hidden transition-all duration-500 hover:bg-rose hover:scale-[1.03]"
+            >
+              <span
+                className="absolute inset-0 translate-x-[-110%] group-hover:translate-x-[110%] transition-transform duration-700 skew-x-[-18deg]"
+                style={{ background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.16), transparent)' }}
+                aria-hidden="true"
+              />
+              <span className="relative z-10">Create your own moment</span>
+            </Link>
+          </motion.div>
         </motion.div>
 
         {/* Brand mark */}
         <motion.p
           initial={{ opacity: 0 }}
-          animate={{ opacity: 0.4 }}
-          transition={{ duration: 2, delay: 4 }}
-          className="font-body text-[9px] tracking-[0.35em] uppercase text-ash-400 mt-12"
+          animate={{ opacity: 0.3 }}
+          transition={{ duration: 1.8, delay: 3.8 }}
+          className="font-body text-[9px] tracking-[0.4em] uppercase text-white/30 mt-14"
         >
           lovethatneverfades
         </motion.p>

@@ -52,7 +52,7 @@ function createParticle(
   switch (motionBehavior) {
     case 'fall': { // Flower petals (falling downwards with wind drift)
       const depth = Math.random() * 1.0 + 0.5; // depth: 0.5 (far) to 1.5 (close)
-      const size = (Math.random() * 6 + 4) * depth;
+      const size = (Math.random() * 9 + 6) * depth;
       const vy = (Math.random() * 0.5 + 0.3) * depth;
       const vx = (Math.random() - 0.5) * 0.2 * depth;
       return {
@@ -76,7 +76,7 @@ function createParticle(
 
     case 'drift': { // Twinkling stars or drifted cosmic elements
       const depth = Math.random() * 0.8 + 0.4;
-      const size = (Math.random() * 3 + 1.2) * depth;
+      const size = (Math.random() * 4.5 + 1.8) * depth;
       const vy = (Math.random() * 0.35 + 0.1) * depth;
       const vx = (Math.random() - 0.5) * 0.25 * depth;
       return {
@@ -99,7 +99,7 @@ function createParticle(
 
     case 'float': { // Balloons (physics-based float upwards)
       const depth = Math.random() * 0.8 + 0.6; // depth: 0.6 to 1.4
-      const size = (Math.random() * 11 + 9) * depth;
+      const size = (Math.random() * 16.5 + 13.5) * depth;
       const vy = -(Math.random() * 0.35 + 0.2) * depth;
       const vx = (Math.random() - 0.5) * 0.15 * depth;
       return {
@@ -123,7 +123,7 @@ function createParticle(
     case 'pulse':
     default: { // Soft breathing embers or bubbles
       const depth = Math.random() * 0.9 + 0.4;
-      const size = (Math.random() * 4 + 1.5) * depth;
+      const size = (Math.random() * 6 + 2.25) * depth;
       const vy = -(Math.random() * 0.25 + 0.1) * depth;
       const vx = (Math.random() - 0.5) * 0.15 * depth;
       return {

@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { themes } from '@/lib/themes';
 import { FadeTheme } from '@/lib/themes/types';
+import ThemeMiniCanvas from './ThemeMiniCanvas';
 
 interface ThemeSelectorProps {
   selected: string;
@@ -13,28 +14,31 @@ interface ThemeSelectorProps {
 // Map technical IDs to beautiful emotional vibe titles
 const VIBE_MAP: Record<string, string> = {
   'romantic-roses': 'Deep Devotion',
-  'magic-stars': 'Starry Whispers',
-  'love-balloons': 'Floating Dreams',
-  'sunset-glow': 'Dusk Affection',
-  'galaxy-romance': 'Infinite Echoes'
+  'magic-stars':    'Starry Whispers',
+  'love-balloons':  'Floating Dreams',
+  'sunset-glow':    'Dusk Affection',
+  'galaxy-romance': 'Infinite Echoes',
+};
+
+// Descriptive motion label shown on card
+const MOTION_LABEL: Record<string, string> = {
+  fall:  'falling petals',
+  drift: 'star drift',
+  float: 'rising balloons',
+  pulse: 'glowing embers',
 };
 
 export default function ThemeSelector({ selected, onChange }: ThemeSelectorProps) {
   const [hovered, setHovered] = useState<string | null>(null);
 
   return (
-    <div className="space-y-4">
-      <div className="text-center mb-6">
-        <label className="font-body text-xs tracking-[0.25em] uppercase text-ash-400">
-          Select the Emotional Vibe
-        </label>
-      </div>
-
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+    <div className="w-full" style={{ maxWidth: 480 }}>
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         {themes.map((theme: FadeTheme) => {
           const isSelected = selected === theme.id;
-          const isHovered = hovered === theme.id;
-          const vibeName = VIBE_MAP[theme.id] || theme.name;
+          const isHovered  = hovered === theme.id;
+          const vibeName   = VIBE_MAP[theme.id]   || theme.name;
+          const motionLbl  = MOTION_LABEL[theme.themeEngine.motionBehavior] || theme.themeEngine.motionBehavior;
 
           return (
             <motion.button
@@ -44,95 +48,85 @@ export default function ThemeSelector({ selected, onChange }: ThemeSelectorProps
               onClick={() => onChange(theme.id)}
               onMouseEnter={() => setHovered(theme.id)}
               onMouseLeave={() => setHovered(null)}
-              whileHover={{ y: -4 }}
-              whileTap={{ scale: 0.98 }}
-              className="relative rounded-2xl w-full text-left overflow-hidden bg-charcoal-900/30 border backdrop-blur-sm p-5 transition-all duration-500 cursor-pointer"
+              whileHover={{ y: -3, scale: 1.015 }}
+              whileTap={{ scale: 0.97 }}
+              className="relative rounded-2xl w-full text-left overflow-hidden backdrop-blur-sm cursor-pointer"
               style={{
-                borderColor: isSelected
-                  ? theme.palette.primary
-                  : 'rgba(255, 255, 255, 0.05)',
-                boxShadow: isSelected
-                  ? `0 0 24px ${theme.palette.primary}20`
-                  : 'none'
+                background:  isSelected
+                  ? `linear-gradient(145deg, ${theme.palette.primary}14 0%, rgba(0,0,0,0.4) 100%)`
+                  : 'rgba(0,0,0,0.28)',
+                border:      `1px solid ${isSelected ? theme.palette.primary : 'rgba(255,255,255,0.06)'}`,
+                boxShadow:   isSelected
+                  ? `0 0 28px ${theme.palette.primary}22, inset 0 0 12px ${theme.palette.primary}08`
+                  : 'none',
+                transition:  'all 0.4s ease',
               }}
             >
-              {/* Emotion Vibe Header */}
-              <div className="flex items-center justify-between mb-4">
-                <div
-                  className="w-2.5 h-2.5 rounded-full"
-                  style={{
-                    background: theme.palette.primary,
-                    boxShadow: `0 0 8px ${theme.palette.primary}`
-                  }}
+              {/* Live mini-canvas particle preview */}
+              <div
+                className="absolute inset-0 overflow-hidden rounded-2xl"
+                style={{ opacity: isSelected ? 0.22 : isHovered ? 0.14 : 0.07, transition: 'opacity 0.5s ease' }}
+              >
+                <ThemeMiniCanvas
+                  motionBehavior={theme.themeEngine.motionBehavior as 'fall' | 'drift' | 'float' | 'pulse'}
+                  particleShape={theme.themeEngine.particleShape}
+                  primary={theme.palette.primary}
+                  accent={theme.palette.accent}
                 />
-                
-                <span className="font-body text-[9px] tracking-[0.2em] uppercase text-ash-500">
-                  {theme.themeEngine.motionBehavior}
-                </span>
               </div>
 
-              {/* Title & Description */}
-              <div className="relative z-10 space-y-1 mb-8">
+              {/* Card content */}
+              <div className="relative z-10 p-5">
+                {/* Top row: colour dot + motion type */}
+                <div className="flex items-center justify-between mb-3">
+                  <motion.div
+                    className="w-2 h-2 rounded-full"
+                    animate={isSelected ? {
+                      boxShadow: [
+                        `0 0 4px ${theme.palette.primary}`,
+                        `0 0 12px ${theme.palette.primary}`,
+                        `0 0 4px ${theme.palette.primary}`,
+                      ],
+                    } : {}}
+                    transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
+                    style={{ background: theme.palette.primary }}
+                  />
+                  <span className="font-body text-[9px] tracking-[0.2em] uppercase text-white/25">
+                    {motionLbl}
+                  </span>
+                </div>
+
+                {/* Vibe name */}
                 <h3
-                  className="font-display text-lg font-light transition-colors duration-300"
-                  style={{ color: isSelected ? theme.palette.accent : '#ffffff' }}
+                  className="font-display text-xl font-light mb-1 transition-colors duration-400"
+                  style={{ color: isSelected ? theme.palette.accent : '#fff' }}
                 >
                   {vibeName}
                 </h3>
-                <p className="font-body text-xs text-ash-400 leading-relaxed">
+
+                {/* Description */}
+                <p className="font-body text-[11px] text-white/35 leading-relaxed">
                   {theme.description}
                 </p>
               </div>
 
-              {/* Animated Background Motion Preview */}
-              <div className="absolute inset-0 z-0 overflow-hidden opacity-10 pointer-events-none">
-                <motion.div
-                  className="w-full h-full"
-                  animate={
-                    isSelected || isHovered
-                      ? {
-                          background: [
-                            `radial-gradient(circle at 20% 20%, ${theme.palette.primary} 0%, transparent 60%)`,
-                            `radial-gradient(circle at 80% 80%, ${theme.palette.secondary} 0%, transparent 60%)`,
-                            `radial-gradient(circle at 20% 20%, ${theme.palette.primary} 0%, transparent 60%)`
-                          ]
-                        }
-                      : {
-                          background: `radial-gradient(circle at 50% 50%, rgba(255,255,255,0.02) 0%, transparent 80%)`
-                        }
-                  }
-                  transition={{
-                    duration: 6,
-                    repeat: Infinity,
-                    ease: 'easeInOut'
-                  }}
-                />
-              </div>
-
-              {/* Selected indicator overlay glow */}
+              {/* Selected checkmark */}
               <AnimatePresence>
                 {isSelected && (
                   <motion.div
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    className="absolute inset-0 border-2 rounded-2xl pointer-events-none"
-                    style={{
-                      borderColor: theme.palette.primary,
-                      boxShadow: `inset 0 0 12px ${theme.palette.primary}15`
-                    }}
-                  />
+                    initial={{ opacity: 0, scale: 0.5 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.5 }}
+                    transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
+                    className="absolute top-3.5 right-3.5 w-5 h-5 rounded-full flex items-center justify-center z-10"
+                    style={{ background: theme.palette.primary }}
+                  >
+                    <svg width="10" height="8" viewBox="0 0 10 8" fill="none">
+                      <path d="M1 3.5L3.8 6.5L9 1" stroke="#fff" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                  </motion.div>
                 )}
               </AnimatePresence>
-
-              {/* Ambient Glow for Selection/Hover */}
-              <motion.div
-                className="absolute -bottom-8 -right-8 w-24 h-24 rounded-full blur-2xl pointer-events-none transition-opacity duration-500"
-                style={{
-                  background: theme.palette.accent,
-                  opacity: isSelected ? 0.22 : isHovered ? 0.12 : 0
-                }}
-              />
             </motion.button>
           );
         })}
