@@ -21,9 +21,15 @@ interface Particle {
   rotationSpeed?: number;
   color: string;
   pulsePhase?: number;
+  depth: number;
+  windPhase?: number;
+  windFreq?: number;
+  windAmp?: number;
+  swayFreq?: number;
+  swayAmp?: number;
 }
 
-const DENSITY_MAP = { low: 25, medium: 50, high: 80 };
+const DENSITY_MAP = { low: 20, medium: 45, high: 75 };
 
 function hexToRgba(hex: string, alpha: number) {
   const r = parseInt(hex.slice(1, 3), 16);
@@ -40,105 +46,155 @@ function createParticle(
   const color = colors[Math.floor(Math.random() * colors.length)];
   const { motionBehavior } = config;
 
-  const baseLife = config.emotionalIntensity === 'deep' ? 400 : config.emotionalIntensity === 'medium' ? 280 : 180;
+  const baseLife = config.emotionalIntensity === 'deep' ? 450 : config.emotionalIntensity === 'medium' ? 300 : 200;
   const maxLife = Math.random() * baseLife + 150;
 
   switch (motionBehavior) {
-    case 'fall':
+    case 'fall': { // Flower petals (falling downwards with wind drift)
+      const depth = Math.random() * 1.0 + 0.5; // depth: 0.5 (far) to 1.5 (close)
+      const size = (Math.random() * 6 + 4) * depth;
+      const vy = (Math.random() * 0.5 + 0.3) * depth;
+      const vx = (Math.random() - 0.5) * 0.2 * depth;
       return {
         x: Math.random() * canvas.width,
-        y: -20,
-        vx: (Math.random() - 0.5) * 0.6,
-        vy: Math.random() * 0.8 + 0.4,
-        size: Math.random() * 8 + 4,
-        opacity: Math.random() * 0.6 + 0.2,
+        y: -30,
+        vx,
+        vy,
+        size,
+        opacity: (Math.random() * 0.45 + 0.15) * (depth / 1.5),
         life: 0,
         maxLife,
         rotation: Math.random() * Math.PI * 2,
-        rotationSpeed: (Math.random() - 0.5) * 0.03,
+        rotationSpeed: (Math.random() - 0.5) * 0.02 * (1 / depth),
         color,
+        depth,
+        windPhase: Math.random() * Math.PI * 2,
+        windFreq: Math.random() * 0.015 + 0.005,
+        windAmp: Math.random() * 1.8 + 0.6,
       };
+    }
 
-    case 'drift':
+    case 'drift': { // Twinkling stars or drifted cosmic elements
+      const depth = Math.random() * 0.8 + 0.4;
+      const size = (Math.random() * 3 + 1.2) * depth;
+      const vy = (Math.random() * 0.35 + 0.1) * depth;
+      const vx = (Math.random() - 0.5) * 0.25 * depth;
       return {
         x: Math.random() * canvas.width,
-        y: Math.random() < 0.5 ? -10 : Math.random() * canvas.height,
-        vx: (Math.random() - 0.5) * 0.3,
-        vy: Math.random() * 0.4 + 0.1,
-        size: Math.random() * 3 + 1,
-        opacity: Math.random() * 0.9 + 0.1,
+        y: Math.random() < 0.4 ? -10 : Math.random() * canvas.height,
+        vx,
+        vy,
+        size,
+        opacity: (Math.random() * 0.8 + 0.2) * (depth / 1.2),
         life: 0,
         maxLife,
         pulsePhase: Math.random() * Math.PI * 2,
         color,
+        depth,
+        windPhase: Math.random() * Math.PI * 2,
+        windFreq: Math.random() * 0.01 + 0.005,
+        windAmp: Math.random() * 1.0 + 0.2,
       };
+    }
 
-    case 'float':
+    case 'float': { // Balloons (physics-based float upwards)
+      const depth = Math.random() * 0.8 + 0.6; // depth: 0.6 to 1.4
+      const size = (Math.random() * 11 + 9) * depth;
+      const vy = -(Math.random() * 0.35 + 0.2) * depth;
+      const vx = (Math.random() - 0.5) * 0.15 * depth;
       return {
         x: Math.random() * canvas.width,
-        y: canvas.height + 20,
-        vx: (Math.random() - 0.5) * 0.5,
-        vy: -(Math.random() * 0.6 + 0.3),
-        size: Math.random() * 16 + 10,
-        opacity: Math.random() * 0.5 + 0.2,
+        y: canvas.height + 40,
+        vx,
+        vy,
+        size,
+        opacity: (Math.random() * 0.4 + 0.35) * (depth / 1.4),
         life: 0,
-        maxLife,
-        rotation: Math.random() * 0.4 - 0.2,
-        rotationSpeed: (Math.random() - 0.5) * 0.01,
+        maxLife: maxLife + 250, // extra lifespan to cross full height
+        rotation: (Math.random() - 0.5) * 0.15,
         color,
+        depth,
+        swayFreq: Math.random() * 0.016 + 0.008,
+        swayAmp: Math.random() * 2.2 + 0.8,
+        pulsePhase: Math.random() * Math.PI * 2, // string sway helper
       };
+    }
 
     case 'pulse':
-    default:
+    default: { // Soft breathing embers or bubbles
+      const depth = Math.random() * 0.9 + 0.4;
+      const size = (Math.random() * 4 + 1.5) * depth;
+      const vy = -(Math.random() * 0.25 + 0.1) * depth;
+      const vx = (Math.random() - 0.5) * 0.15 * depth;
       return {
         x: Math.random() * canvas.width,
         y: Math.random() * canvas.height,
-        vx: (Math.random() - 0.5) * 0.2,
-        vy: -(Math.random() * 0.3 + 0.1),
-        size: Math.random() * 4 + 1,
-        opacity: Math.random() * 0.7 + 0.1,
+        vx,
+        vy,
+        size,
+        opacity: (Math.random() * 0.65 + 0.15) * (depth / 1.3),
         life: 0,
         maxLife,
         pulsePhase: Math.random() * Math.PI * 2,
         color,
+        depth,
       };
+    }
   }
 }
 
 function drawParticle(
   ctx: CanvasRenderingContext2D,
   p: Particle,
-  config: ThemeEngineConfig
+  config: ThemeEngineConfig,
+  glowMult: number
 ) {
-  const { particleShape, motionBehavior, emotionalIntensity } = config;
+  const { particleShape, motionBehavior } = config;
   const lifeRatio = p.life / p.maxLife;
-  const glowMult = emotionalIntensity === 'deep' ? 4 : emotionalIntensity === 'medium' ? 2.5 : 1.5;
 
   switch (particleShape) {
     case 'petal': {
       ctx.save();
       ctx.translate(p.x, p.y);
       ctx.rotate(p.rotation ?? 0);
-      ctx.globalAlpha = p.opacity * (1 - lifeRatio);
+      ctx.globalAlpha = Math.max(0, p.opacity * (1 - lifeRatio));
+      
+      // Beautiful organic rose petal shape (curved curves)
       ctx.beginPath();
-      ctx.ellipse(0, 0, p.size * 0.5, p.size, 0, 0, Math.PI * 2);
+      ctx.moveTo(0, -p.size);
+      ctx.bezierCurveTo(p.size * 0.85, -p.size * 0.85, p.size * 0.95, p.size * 0.35, 0, p.size * 1.15);
+      ctx.bezierCurveTo(-p.size * 0.95, p.size * 0.35, -p.size * 0.85, -p.size * 0.85, 0, -p.size);
+      ctx.closePath();
+      
       ctx.fillStyle = p.color;
+      ctx.shadowBlur = p.size * 0.55 * glowMult;
+      ctx.shadowColor = p.color;
       ctx.fill();
+      
+      // Detailed curve inside the petal for texture
+      ctx.beginPath();
+      ctx.moveTo(0, -p.size * 0.45);
+      ctx.quadraticCurveTo(p.size * 0.12, 0, 0, p.size * 0.55);
+      ctx.strokeStyle = hexToRgba('#ffffff', 0.12);
+      ctx.lineWidth = 0.5;
+      ctx.stroke();
+
       ctx.restore();
       break;
     }
 
     case 'star': {
       const twinkle = p.pulsePhase !== undefined
-        ? Math.sin(p.life * 0.04 + p.pulsePhase)
+        ? Math.sin(p.life * 0.045 + p.pulsePhase)
         : 1;
-      const alpha = p.opacity * Math.sin(lifeRatio * Math.PI) * (0.6 + 0.4 * twinkle);
+      const alpha = p.opacity * Math.sin(lifeRatio * Math.PI) * (0.55 + 0.45 * twinkle);
+      
       ctx.save();
       ctx.globalAlpha = Math.max(0, alpha);
       ctx.beginPath();
       ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
       ctx.fillStyle = p.color;
-      ctx.shadowBlur = p.size * glowMult;
+      ctx.shadowBlur = p.size * 2 * glowMult;
       ctx.shadowColor = p.color;
       ctx.fill();
       ctx.restore();
@@ -149,36 +205,67 @@ function drawParticle(
       ctx.save();
       ctx.translate(p.x, p.y);
       ctx.rotate(p.rotation ?? 0);
-      ctx.globalAlpha = p.opacity * (1 - lifeRatio);
+      ctx.globalAlpha = Math.max(0, p.opacity * (1 - lifeRatio));
+      
+      // Physics-based balloon drawing (wider top, tapered bottom)
       ctx.beginPath();
-      ctx.ellipse(0, 0, p.size * 0.75, p.size, 0, 0, Math.PI * 2);
-      ctx.fillStyle = hexToRgba(p.color, 0.4);
+      ctx.moveTo(0, -p.size * 1.1);
+      ctx.bezierCurveTo(p.size * 1.15, -p.size * 1.1, p.size * 1.25, p.size * 0.25, 0, p.size * 1.05);
+      ctx.bezierCurveTo(-p.size * 1.25, p.size * 0.25, -p.size * 1.15, -p.size * 1.1, 0, -p.size * 1.1);
+      ctx.closePath();
+      
+      ctx.fillStyle = hexToRgba(p.color, 0.42);
+      ctx.shadowBlur = p.size * 0.85 * glowMult;
+      ctx.shadowColor = p.color;
       ctx.fill();
+      
       ctx.strokeStyle = p.color;
-      ctx.lineWidth = 0.8;
+      ctx.lineWidth = 0.9;
       ctx.stroke();
+
+      // Reflection gloss
       ctx.beginPath();
-      ctx.moveTo(0, p.size);
-      ctx.lineTo(0, p.size + 14);
-      ctx.strokeStyle = hexToRgba(p.color, 0.3);
-      ctx.lineWidth = 0.5;
+      ctx.ellipse(-p.size * 0.32, -p.size * 0.42, p.size * 0.22, p.size * 0.38, Math.PI / 5, 0, Math.PI * 2);
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.18)';
+      ctx.fill();
+
+      // Balloon knot
+      ctx.beginPath();
+      ctx.moveTo(-p.size * 0.1, p.size * 1.05);
+      ctx.lineTo(p.size * 0.1, p.size * 1.05);
+      ctx.lineTo(0, p.size * 1.2);
+      ctx.closePath();
+      ctx.fillStyle = p.color;
+      ctx.fill();
+
+      // Realistic quadratic Bezier string sway
+      ctx.beginPath();
+      ctx.moveTo(0, p.size * 1.2);
+      const stringSway = Math.sin(p.life * 0.038 + (p.pulsePhase || 0)) * (p.size * 0.9);
+      const stringLen = p.size * 2.3;
+      ctx.quadraticCurveTo(stringSway, p.size * 1.8, stringSway * 0.4, p.size * 1.2 + stringLen);
+      ctx.strokeStyle = hexToRgba(p.color, 0.32);
+      ctx.lineWidth = 0.65;
       ctx.stroke();
+
       ctx.restore();
       break;
     }
 
     case 'ember': {
       const pulse = p.pulsePhase !== undefined
-        ? 0.7 + 0.3 * Math.sin(p.life * 0.06 + p.pulsePhase)
+        ? 0.72 + 0.28 * Math.sin(p.life * 0.05 + p.pulsePhase)
         : 1;
       const fadeAlpha = p.opacity * Math.sin(lifeRatio * Math.PI) * pulse;
       ctx.save();
       ctx.globalAlpha = Math.max(0, fadeAlpha);
-      const grad = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.size * 3);
+      
+      const grad = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.size * 2.8);
       grad.addColorStop(0, p.color);
       grad.addColorStop(1, 'transparent');
+      
       ctx.beginPath();
-      ctx.arc(p.x, p.y, p.size * 3, 0, Math.PI * 2);
+      ctx.arc(p.x, p.y, p.size * 2.8, 0, Math.PI * 2);
       ctx.fillStyle = grad;
       ctx.fill();
       ctx.restore();
@@ -190,7 +277,7 @@ function drawParticle(
       const fadeAlpha = p.opacity * Math.sin(lifeRatio * Math.PI);
       ctx.save();
       ctx.globalAlpha = Math.max(0, fadeAlpha);
-      ctx.shadowBlur = p.size * glowMult;
+      ctx.shadowBlur = p.size * 1.8 * glowMult;
       ctx.shadowColor = p.color;
       ctx.beginPath();
       ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
@@ -201,16 +288,16 @@ function drawParticle(
     }
   }
 
-  // Pulse motionBehavior: extra soft glow pulse ring
+  // Draw pulse motionBehavior ring
   if (motionBehavior === 'pulse' && p.pulsePhase !== undefined) {
-    const ring = 0.5 + 0.5 * Math.sin(p.life * 0.05 + p.pulsePhase);
-    const ringAlpha = ring * p.opacity * 0.2 * (1 - lifeRatio);
+    const ring = 0.5 + 0.5 * Math.sin(p.life * 0.045 + p.pulsePhase);
+    const ringAlpha = ring * p.opacity * 0.18 * (1 - lifeRatio);
     ctx.save();
     ctx.globalAlpha = Math.max(0, ringAlpha);
     ctx.beginPath();
-    ctx.arc(p.x, p.y, p.size * (2 + ring * 3), 0, Math.PI * 2);
+    ctx.arc(p.x, p.y, p.size * (2.2 + ring * 2.8), 0, Math.PI * 2);
     ctx.strokeStyle = p.color;
-    ctx.lineWidth = 0.5;
+    ctx.lineWidth = 0.55;
     ctx.stroke();
     ctx.restore();
   }
@@ -232,6 +319,7 @@ export default function AtmosphereLayer({
 
     const colors = [palette.primary, palette.secondary, palette.accent];
     const MAX = DENSITY_MAP[themeEngine.particleDensity];
+    const glowMult = themeEngine.emotionalIntensity === 'deep' ? 3.8 : themeEngine.emotionalIntensity === 'medium' ? 2.4 : 1.3;
 
     const resize = () => {
       canvas.width = window.innerWidth;
@@ -240,10 +328,12 @@ export default function AtmosphereLayer({
     resize();
     window.addEventListener('resize', resize);
 
-    // Seed particles staggered so they don't all spawn at once
+    // Populate particles with random initial life to prevent sudden bursts
     for (let i = 0; i < MAX; i++) {
       const p = createParticle(canvas, themeEngine, colors);
       p.life = Math.random() * p.maxLife;
+      // Stagger position
+      p.y = Math.random() * canvas.height;
       particlesRef.current.push(p);
     }
 
@@ -252,14 +342,36 @@ export default function AtmosphereLayer({
 
       particlesRef.current = particlesRef.current.filter((p) => {
         p.life++;
-        p.x += p.vx;
+        
+        // Update horizontal position using organic wind sines or spring-sways
+        if (themeEngine.motionBehavior === 'fall' && p.windPhase !== undefined && p.windFreq !== undefined && p.windAmp !== undefined) {
+          // Fall wind sway (rose petals)
+          p.x += p.vx + Math.sin(p.life * p.windFreq + p.windPhase) * p.windAmp * 0.15;
+        } else if (themeEngine.motionBehavior === 'float' && p.swayFreq !== undefined && p.swayAmp !== undefined) {
+          // Floating spring sway (balloons)
+          p.x += p.vx + Math.sin(p.life * p.swayFreq) * p.swayAmp * 0.12;
+          p.rotation = Math.sin(p.life * p.swayFreq * 0.7) * 0.12; // tilt oscillation
+        } else if (themeEngine.motionBehavior === 'drift' && p.windPhase !== undefined && p.windFreq !== undefined && p.windAmp !== undefined) {
+          // Subtle drifting wave
+          p.x += p.vx + Math.cos(p.life * p.windFreq + p.windPhase) * p.windAmp * 0.08;
+        } else {
+          p.x += p.vx;
+        }
+
         p.y += p.vy;
-        if (p.rotation !== undefined && p.rotationSpeed !== undefined) {
+
+        if (p.rotation !== undefined && p.rotationSpeed !== undefined && themeEngine.motionBehavior !== 'float') {
           p.rotation += p.rotationSpeed;
         }
 
-        drawParticle(ctx, p, themeEngine);
-        return p.life < p.maxLife;
+        drawParticle(ctx, p, themeEngine, glowMult);
+        
+        // boundary check
+        const isOut = p.vy > 0 
+          ? p.y > canvas.height + 40 // falling
+          : p.y < -40;               // floating
+
+        return p.life < p.maxLife && !isOut;
       });
 
       while (particlesRef.current.length < MAX) {
@@ -281,7 +393,7 @@ export default function AtmosphereLayer({
   return (
     <canvas
       ref={canvasRef}
-      className="atmosphere-canvas"
+      className="absolute inset-0 w-full h-full pointer-events-none z-0"
       aria-hidden="true"
     />
   );
