@@ -21,21 +21,35 @@ export default function LifespanIndicator({
       initial={{ opacity: 0, y: -16 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
-      className="flex flex-col items-center gap-3"
+      className="flex flex-col items-center gap-3 select-none"
     >
       {/* Label */}
-      <p className="font-body text-xs tracking-[0.25em] uppercase text-ash-400">
+      <p className="font-body text-[10px] tracking-[0.35em] uppercase text-ash-400">
         Lifespan
       </p>
 
-      {/* Track */}
-      <div className="w-48 h-px bg-charcoal-600 relative overflow-hidden">
+      {/* Track with Glow and Handle */}
+      <div className="w-48 h-[2px] bg-charcoal-800 rounded-full relative overflow-visible">
         <motion.div
-          initial={{ scaleX: 0 }}
-          animate={{ scaleX: pct / 100 }}
+          initial={{ width: 0 }}
+          animate={{ width: `${pct}%` }}
           transition={{ duration: 1.2, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
-          className="absolute left-0 top-0 h-full origin-left"
-          style={{ background: accentColor, width: '100%' }}
+          className="absolute left-0 top-0 h-full rounded-full"
+          style={{
+            background: `linear-gradient(90deg, ${accentColor}40, ${accentColor})`,
+            boxShadow: `0 0 10px ${accentColor}`
+          }}
+        />
+        {/* Glow indicator handle dot */}
+        <motion.div
+          initial={{ left: 0, opacity: 0 }}
+          animate={{ left: `${pct}%`, opacity: 1 }}
+          transition={{ duration: 1.2, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
+          className="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 w-2 h-2 rounded-full"
+          style={{
+            background: '#ffffff',
+            boxShadow: `0 0 8px #ffffff, 0 0 4px ${accentColor}`
+          }}
         />
       </div>
 
@@ -44,12 +58,12 @@ export default function LifespanIndicator({
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.6, delay: 0.8 }}
-        className="font-display text-sm font-light"
+        className="font-body text-[10px] tracking-[0.2em] uppercase font-light"
         style={{ color: accentColor }}
       >
         {remaining} / {maxViews}{' '}
-        <span className="font-body text-xs text-ash-400 font-normal tracking-wide">
-          views remaining
+        <span className="text-ash-400 font-normal lowercase tracking-wide">
+          views remaining before fading
         </span>
       </motion.p>
     </motion.div>

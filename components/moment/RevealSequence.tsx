@@ -188,7 +188,7 @@ export default function RevealSequence({ moment }: RevealSequenceProps) {
       )}
 
       {/* Central Content */}
-      <div className="relative z-10 max-w-xl w-full text-center space-y-10">
+      <div className="relative z-10 max-w-xl w-full text-center flex flex-col items-center justify-center">
 
         {/* Step 2: Emotional Intro */}
         <AnimatePresence>
@@ -199,7 +199,7 @@ export default function RevealSequence({ moment }: RevealSequenceProps) {
               initial="hidden"
               animate="visible"
               exit="exit"
-              className="font-body text-xs tracking-[0.3em] uppercase text-ash-400"
+              className="font-body text-xs tracking-[0.3em] uppercase text-ash-400 mb-8"
             >
               A moment created for you is unfolding…
             </motion.p>
@@ -214,7 +214,7 @@ export default function RevealSequence({ moment }: RevealSequenceProps) {
               variants={fadeUp}
               initial="hidden"
               animate="visible"
-              className={step >= STEP_MESSAGE ? "mb-6" : ""}
+              className="w-full"
             >
               {step < STEP_MESSAGE && (
                 <p
@@ -224,9 +224,15 @@ export default function RevealSequence({ moment }: RevealSequenceProps) {
                   for
                 </p>
               )}
-              <h1
+              <motion.h1
                 className="font-display text-5xl sm:text-6xl font-light leading-none tracking-tight"
                 style={{ color: theme.palette.primary }}
+                animate={step >= STEP_MESSAGE ? { y: [0, -3, 0] } : {}}
+                transition={{
+                  duration: 5,
+                  repeat: Infinity,
+                  ease: "easeInOut"
+                }}
               >
                 <TypewriterText
                   text={moment.partner_name}
@@ -238,10 +244,21 @@ export default function RevealSequence({ moment }: RevealSequenceProps) {
                     }
                   }}
                 />
-              </h1>
+              </motion.h1>
             </motion.div>
           )}
         </AnimatePresence>
+
+        {/* Dynamic vertical connector line 1 */}
+        {step >= STEP_MESSAGE && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: 32, opacity: 0.35 }}
+            transition={{ duration: 1.5, ease: 'easeOut' }}
+            className="w-px my-6"
+            style={{ background: `linear-gradient(to bottom, ${theme.palette.primary}, transparent)` }}
+          />
+        )}
 
         {/* Step 5: Love Message (Emotional breathing container) */}
         <AnimatePresence>
@@ -251,15 +268,10 @@ export default function RevealSequence({ moment }: RevealSequenceProps) {
               variants={fadeUp}
               initial="hidden"
               animate="visible"
-              className="px-2"
+              className="px-2 w-full"
             >
-              <div
-                className="w-12 h-px mx-auto mb-8 opacity-45"
-                style={{ background: theme.palette.secondary }}
-              />
-              
               <motion.div
-                className="relative p-8 sm:p-10 rounded-2xl bg-void/30 backdrop-blur-lg border max-w-xl mx-auto shadow-2xl overflow-hidden"
+                className="relative p-8 sm:p-10 rounded-2xl bg-void/35 backdrop-blur-lg border max-w-md mx-auto shadow-2xl overflow-hidden"
                 animate={{
                   scale: [1, 1.012, 1],
                   opacity: [0.97, 1, 0.97],
@@ -284,13 +296,13 @@ export default function RevealSequence({ moment }: RevealSequenceProps) {
                   variants={containerVariants}
                   initial="hidden"
                   animate="visible"
-                  className="space-y-5 text-left"
+                  className="space-y-5 text-center"
                 >
                   {lines.map((line, i) => (
                     <motion.p
                       key={i}
                       variants={lineVariants}
-                      className="font-display text-lg sm:text-xl font-light leading-relaxed text-white/95"
+                      className="font-display text-xl sm:text-2xl font-light leading-relaxed text-white/95"
                     >
                       {line}
                     </motion.p>
@@ -301,6 +313,17 @@ export default function RevealSequence({ moment }: RevealSequenceProps) {
           )}
         </AnimatePresence>
 
+        {/* Dynamic vertical connector line 2 */}
+        {step >= STEP_SIGNATURE && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: 32, opacity: 0.25 }}
+            transition={{ duration: 1.5, delay: 0.2, ease: 'easeOut' }}
+            className="w-px my-6"
+            style={{ background: `linear-gradient(to bottom, transparent, ${theme.palette.primary})` }}
+          />
+        )}
+
         {/* Step 6: Sender Signature */}
         <AnimatePresence>
           {step >= STEP_SIGNATURE && (
@@ -309,12 +332,8 @@ export default function RevealSequence({ moment }: RevealSequenceProps) {
               variants={signatureVariants}
               initial="hidden"
               animate="visible"
-              className="pt-6"
+              className="w-full"
             >
-              <div
-                className="w-12 h-px mx-auto mb-6 opacity-30"
-                style={{ background: theme.palette.primary }}
-              />
               <p className="font-body text-[10px] tracking-[0.35em] uppercase text-ash-400 mb-2">
                 with love,
               </p>
@@ -326,12 +345,12 @@ export default function RevealSequence({ moment }: RevealSequenceProps) {
                     `0 0 8px ${theme.palette.accent}15`,
                     `0 0 24px ${theme.palette.accent}45`,
                     `0 0 8px ${theme.palette.accent}15`
-                  ]
+                  ],
+                  y: [0, 3, 0]
                 }}
                 transition={{
-                  duration: 4,
-                  repeat: Infinity,
-                  ease: "easeInOut"
+                  textShadow: { duration: 4, repeat: Infinity, ease: "easeInOut" },
+                  y: { duration: 5, repeat: Infinity, ease: "easeInOut", delay: 1 }
                 }}
               >
                 — {moment.sender_name} <span className="text-rose-600">❤️</span>
@@ -348,7 +367,7 @@ export default function RevealSequence({ moment }: RevealSequenceProps) {
               initial={{ opacity: 0 }}
               animate={{ opacity: 0.5 }}
               transition={{ duration: 2.2, delay: 2.2 }}
-              className="font-body text-[9px] tracking-[0.38em] uppercase text-ash-400 pt-8"
+              className="font-body text-[9px] tracking-[0.38em] uppercase text-ash-400 pt-10 w-full"
             >
               lovethatneverfades
             </motion.p>
