@@ -7,6 +7,7 @@ import { getTheme } from '../../lib/themes';
 import LifespanIndicator from './LifespanIndicator';
 import AtmosphereLayer from './AtmosphereLayer';
 import TypewriterText from '../ui/TypewriterText';
+import { getMessageEmoji } from '../../lib/messageEmoji';
 
 interface RevealSequenceProps {
   moment: Moment;
@@ -24,6 +25,9 @@ const STEP_ATMOSPHERE  = 6; // Canvas atmosphere + final branding
 export default function RevealSequence({ moment }: RevealSequenceProps) {
   const theme = getTheme(moment.theme_id);
   const { pacing } = theme;
+
+  // Derive a context-sensitive emoji from the message text
+  const signatureEmoji = getMessageEmoji(moment.message, moment.sender_name);
 
   const [step, setStep] = useState(STEP_SILENCE);
   const [atmosphereActive, setAtmosphereActive] = useState(false);
@@ -355,7 +359,7 @@ export default function RevealSequence({ moment }: RevealSequenceProps) {
                   y: { duration: 5, repeat: Infinity, ease: "easeInOut", delay: 1 }
                 }}
               >
-                — {moment.sender_name} <span className="text-rose-600">❤️</span>
+                — {moment.sender_name} <span>{signatureEmoji}</span>
               </motion.p>
             </motion.div>
           )}

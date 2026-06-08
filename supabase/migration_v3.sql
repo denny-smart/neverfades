@@ -9,7 +9,7 @@
 --
 -- As of this migration, the client generates a fresh UUID per page
 -- load (no longer stored in localStorage). This makes every visit —
--- including reloads — count as a unique view toward the 10-view cap.
+-- including reloads — count as a unique view toward the 5-view cap.
 --
 -- We drop the unique constraint so the RPC can INSERT duplicate
 -- moment_id rows (each with a different per-load session_id UUID).

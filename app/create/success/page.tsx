@@ -194,7 +194,7 @@ function SuccessContent() {
           style={{ maxWidth: 320 }}
         >
           Share this keepsake. It lives for exactly{' '}
-          <span className="text-white/70 font-medium">10 views</span>, then it
+          <span className="text-white/70 font-medium">5 views</span>, then it
           fades — but the feeling won&apos;t.
         </motion.p>
 
@@ -337,7 +337,7 @@ function SuccessContent() {
 
             {/* Heart gauge */}
             <div className="flex items-center gap-1.5 mb-3">
-              {Array.from({ length: 10 }).map((_, i) => {
+              {Array.from({ length: 5 }).map((_, i) => {
                 const isFelt = i < stats.view_count;
                 const isLast = i === stats.view_count - 1 && stats.view_count < stats.max_views;
                 return (
@@ -390,7 +390,7 @@ function SuccessContent() {
           className="font-body text-[9px] text-white/20 italic text-center leading-normal mb-8"
           style={{ maxWidth: 280 }}
         >
-          Once opened {stats?.max_views ?? 10} times, the link dissolves permanently. There is no recovery.
+          Once opened {stats?.max_views ?? 5} times, the link dissolves permanently. There is no recovery.
         </motion.p>
 
         {/* ── Create another ── */}

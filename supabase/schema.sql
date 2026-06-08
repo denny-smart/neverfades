@@ -12,7 +12,7 @@ CREATE TABLE IF NOT EXISTS moments (
   message TEXT NOT NULL,
   theme_id VARCHAR NOT NULL,
   view_count INT DEFAULT 0,
-  max_views INT DEFAULT 10,
+  max_views INT DEFAULT 5,
   is_active BOOLEAN DEFAULT true,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
