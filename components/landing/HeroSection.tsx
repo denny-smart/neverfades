@@ -21,7 +21,7 @@ export default function HeroSection() {
       <RoseLineArt />
 
       {/* Content */}
-      <div className="relative z-10 text-center max-w-2xl mx-auto">
+      <div className="relative z-10 text-center max-w-2xl mx-auto flex flex-col items-center">
         {/* Eyebrow */}
         <motion.p
           initial={{ opacity: 0, y: 10 }}
@@ -49,48 +49,76 @@ export default function HeroSection() {
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 1.2, delay: 1.8, ease: [0.16, 1, 0.3, 1] }}
-          className="font-body text-base sm:text-lg text-ash-300 font-light leading-relaxed mb-14 max-w-md mx-auto"
+          className="font-body text-base sm:text-lg text-ash-300 font-light leading-relaxed mb-16 max-w-md mx-auto"
         >
           For a love that never does.
         </motion.p>
 
-        {/* CTAs */}
+        {/* Single Premium CTA */}
         <motion.div
-          initial={{ opacity: 0, y: 16 }}
+          initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 1, delay: 2.4, ease: [0.16, 1, 0.3, 1] }}
-          className="flex flex-col sm:flex-row gap-4 justify-center items-center"
+          className="flex flex-col items-center gap-5"
         >
-          <Link
-            href="/create"
-            id="cta-ignite"
-            className="group relative inline-flex items-center justify-center min-w-[220px] px-8 py-4 bg-crimson text-white font-body text-sm font-medium tracking-widest uppercase overflow-hidden transition-all duration-500 hover:bg-rose glow-crimson"
+          {/* Button */}
+          <motion.div
+            animate={{
+              boxShadow: [
+                '0 0 20px rgba(196,18,48,0.25)',
+                '0 0 45px rgba(196,18,48,0.55)',
+                '0 0 20px rgba(196,18,48,0.25)',
+              ],
+            }}
+            transition={{ duration: 2.6, repeat: Infinity, ease: 'easeInOut' }}
+            className="rounded-sm"
           >
-            <span className="relative z-10">Ignite a Moment</span>
-            <span
-              className="absolute inset-0 bg-rose translate-x-[-100%] group-hover:translate-x-0 transition-transform duration-500"
-              aria-hidden="true"
-            />
-          </Link>
+            <Link
+              href="/create"
+              id="cta-ignite"
+              className="group relative inline-flex items-center justify-center px-12 py-5 bg-crimson text-white font-body text-sm tracking-[0.25em] uppercase overflow-hidden transition-all duration-500 hover:bg-rose hover:scale-[1.03]"
+            >
+              {/* Shimmer sweep */}
+              <span
+                className="absolute inset-0 translate-x-[-110%] group-hover:translate-x-[110%] transition-transform duration-700 skew-x-[-20deg]"
+                style={{
+                  background:
+                    'linear-gradient(90deg, transparent, rgba(255,255,255,0.18), transparent)',
+                }}
+                aria-hidden="true"
+              />
+              <span className="relative z-10 flex items-center gap-3">
+                <span>Ignite a Moment</span>
+                <svg
+                  width="14"
+                  height="14"
+                  viewBox="0 0 14 14"
+                  fill="none"
+                  className="opacity-80 group-hover:translate-x-1 transition-transform duration-300"
+                  aria-hidden="true"
+                >
+                  <path
+                    d="M1 7h12M8 2l5 5-5 5"
+                    stroke="currentColor"
+                    strokeWidth="1.4"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+              </span>
+            </Link>
+          </motion.div>
 
-          <Link
-            href="/create?mode=surprise"
-            id="cta-surprise"
-            className="inline-flex items-center justify-center min-w-[220px] px-8 py-4 border border-charcoal-600 text-ash-200 font-body text-sm font-medium tracking-widest uppercase hover:border-crimson hover:text-white transition-all duration-500"
+          {/* Scarcity micro-label below the button */}
+          <motion.p
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 1, delay: 3.2 }}
+            className="font-body text-[10px] tracking-[0.25em] uppercase text-ash-500"
           >
-            Create a Surprise
-          </Link>
+            Each link fades after 10 views. No exceptions.
+          </motion.p>
         </motion.div>
-
-        {/* Scarcity hint */}
-        <motion.p
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 1, delay: 3.2 }}
-          className="font-body text-xs text-ash-400 mt-10 tracking-wide"
-        >
-          Each link fades after 10 views. No exceptions.
-        </motion.p>
       </div>
 
       {/* Bottom fade */}
