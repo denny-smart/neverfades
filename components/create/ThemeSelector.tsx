@@ -18,14 +18,25 @@ const VIBE_MAP: Record<string, string> = {
   'love-balloons':  'Floating Dreams',
   'sunset-glow':    'Dusk Affection',
   'galaxy-romance': 'Infinite Echoes',
+  'teddy-love':     'Soft Embrace',
+  'love-emojis':    'Love Symbols',
+  'pink-petals':    'Blush Whisper',
+  'white-petals':   'Pure Serenity',
+  'golden-petals':  'Gilded Dawn',
 };
 
 // Descriptive motion label shown on card
 const MOTION_LABEL: Record<string, string> = {
-  fall:  'falling petals',
-  drift: 'star drift',
-  float: 'rising balloons',
-  pulse: 'glowing embers',
+  'romantic-roses': 'falling petals',
+  'magic-stars':    'star drift',
+  'love-balloons':  'rising balloons',
+  'sunset-glow':    'glowing embers',
+  'galaxy-romance': 'star drift',
+  'teddy-love':     'tumbling bears',
+  'love-emojis':    'rising emojis',
+  'pink-petals':    'blush flutter',
+  'white-petals':   'ivory cascade',
+  'golden-petals':  'golden flutter',
 };
 
 export default function ThemeSelector({ selected, onChange }: ThemeSelectorProps) {
@@ -38,7 +49,7 @@ export default function ThemeSelector({ selected, onChange }: ThemeSelectorProps
           const isSelected = selected === theme.id;
           const isHovered  = hovered === theme.id;
           const vibeName   = VIBE_MAP[theme.id]   || theme.name;
-          const motionLbl  = MOTION_LABEL[theme.themeEngine.motionBehavior] || theme.themeEngine.motionBehavior;
+          const motionLbl  = MOTION_LABEL[theme.id] || theme.themeEngine.motionBehavior;
 
           return (
             <motion.button

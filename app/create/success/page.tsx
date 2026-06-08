@@ -23,6 +23,11 @@ function ThemeIcon({ id }: { id: string }) {
     'love-balloons':  '🎈',
     'sunset-glow':    '🔥',
     'galaxy-romance': '🌌',
+    'teddy-love':     '🧸',
+    'love-emojis':    '💖',
+    'pink-petals':    '🌸',
+    'white-petals':    '🤍',
+    'golden-petals':  '💛',
   };
   return <span className="text-3xl select-none">{icons[id] ?? '🌹'}</span>;
 }

@@ -272,6 +272,117 @@ function drawParticle(
       break;
     }
 
+    case 'bear': {
+      const fadeAlpha = p.opacity * (1 - lifeRatio);
+      ctx.save();
+      ctx.translate(p.x, p.y);
+      ctx.rotate(p.rotation ?? 0);
+      ctx.globalAlpha = Math.max(0, fadeAlpha);
+
+      const s = p.size;
+      const bodyColor  = p.color;
+      const innerColor = hexToRgba('#f4c0a0', 0.85);
+      const darkColor  = hexToRgba('#3b1f0a', 0.9);
+
+      // Shadow glow
+      ctx.shadowBlur  = s * 1.4 * glowMult;
+      ctx.shadowColor = p.color;
+
+      // Left ear
+      ctx.beginPath();
+      ctx.arc(-s * 0.72, -s * 0.82, s * 0.42, 0, Math.PI * 2);
+      ctx.fillStyle = bodyColor;
+      ctx.fill();
+      // Left ear inner
+      ctx.beginPath();
+      ctx.arc(-s * 0.72, -s * 0.82, s * 0.22, 0, Math.PI * 2);
+      ctx.fillStyle = innerColor;
+      ctx.fill();
+
+      // Right ear
+      ctx.beginPath();
+      ctx.arc(s * 0.72, -s * 0.82, s * 0.42, 0, Math.PI * 2);
+      ctx.fillStyle = bodyColor;
+      ctx.fill();
+      // Right ear inner
+      ctx.beginPath();
+      ctx.arc(s * 0.72, -s * 0.82, s * 0.22, 0, Math.PI * 2);
+      ctx.fillStyle = innerColor;
+      ctx.fill();
+
+      // Head
+      ctx.beginPath();
+      ctx.arc(0, 0, s, 0, Math.PI * 2);
+      ctx.fillStyle = bodyColor;
+      ctx.fill();
+
+      // Muzzle
+      ctx.beginPath();
+      ctx.ellipse(0, s * 0.32, s * 0.48, s * 0.34, 0, 0, Math.PI * 2);
+      ctx.fillStyle = innerColor;
+      ctx.fill();
+
+      // Left eye
+      ctx.beginPath();
+      ctx.arc(-s * 0.32, -s * 0.18, s * 0.12, 0, Math.PI * 2);
+      ctx.fillStyle = darkColor;
+      ctx.fill();
+      // Left eye shine
+      ctx.beginPath();
+      ctx.arc(-s * 0.27, -s * 0.22, s * 0.045, 0, Math.PI * 2);
+      ctx.fillStyle = 'rgba(255,255,255,0.8)';
+      ctx.fill();
+
+      // Right eye
+      ctx.beginPath();
+      ctx.arc(s * 0.32, -s * 0.18, s * 0.12, 0, Math.PI * 2);
+      ctx.fillStyle = darkColor;
+      ctx.fill();
+      // Right eye shine
+      ctx.beginPath();
+      ctx.arc(s * 0.37, -s * 0.22, s * 0.045, 0, Math.PI * 2);
+      ctx.fillStyle = 'rgba(255,255,255,0.8)';
+      ctx.fill();
+
+      // Nose
+      ctx.beginPath();
+      ctx.ellipse(0, s * 0.2, s * 0.14, s * 0.1, 0, 0, Math.PI * 2);
+      ctx.fillStyle = darkColor;
+      ctx.fill();
+
+      // Smile
+      ctx.beginPath();
+      ctx.arc(0, s * 0.28, s * 0.2, 0.2, Math.PI - 0.2);
+      ctx.strokeStyle = darkColor;
+      ctx.lineWidth = s * 0.07;
+      ctx.lineCap = 'round';
+      ctx.stroke();
+
+      ctx.restore();
+      break;
+    }
+
+    case 'emoji': {
+      const EMOJIS = ['❤️', '💕', '💖', '💗', '😍', '💋', '🌸', '💝', '🥰', '✨'];
+      // Each particle gets a stable emoji via its windPhase seed
+      const emojiIndex = Math.floor((p.windPhase ?? 0) * EMOJIS.length / (Math.PI * 2)) % EMOJIS.length;
+      const emoji = EMOJIS[Math.abs(emojiIndex)];
+
+      const fadeAlpha = p.opacity * Math.sin(lifeRatio * Math.PI);
+      const pulse     = p.pulsePhase !== undefined
+        ? 0.88 + 0.12 * Math.sin(p.life * 0.055 + p.pulsePhase)
+        : 1;
+
+      ctx.save();
+      ctx.globalAlpha = Math.max(0, fadeAlpha * pulse);
+      ctx.font = `${p.size * 2}px serif`;
+      ctx.textAlign    = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(emoji, p.x, p.y);
+      ctx.restore();
+      break;
+    }
+
     case 'circle':
     default: {
       const fadeAlpha = p.opacity * Math.sin(lifeRatio * Math.PI);

@@ -160,6 +160,81 @@ function drawMiniParticle(
       ctx.stroke();
       break;
     }
+    case 'bear': {
+      ctx.translate(p.x, p.y);
+      ctx.rotate(p.rotation);
+      
+      const s = p.size;
+      const bodyColor = p.color;
+      // Inlined helper or direct color representation
+      const innerColor = 'rgba(244, 192, 160, 0.85)';
+      const darkColor = 'rgba(59, 31, 10, 0.9)';
+
+      // Left ear
+      ctx.beginPath();
+      ctx.arc(-s * 0.72, -s * 0.82, s * 0.42, 0, Math.PI * 2);
+      ctx.fillStyle = bodyColor;
+      ctx.fill();
+      // Left ear inner
+      ctx.beginPath();
+      ctx.arc(-s * 0.72, -s * 0.82, s * 0.22, 0, Math.PI * 2);
+      ctx.fillStyle = innerColor;
+      ctx.fill();
+
+      // Right ear
+      ctx.beginPath();
+      ctx.arc(s * 0.72, -s * 0.82, s * 0.42, 0, Math.PI * 2);
+      ctx.fillStyle = bodyColor;
+      ctx.fill();
+      // Right ear inner
+      ctx.beginPath();
+      ctx.arc(s * 0.72, -s * 0.82, s * 0.22, 0, Math.PI * 2);
+      ctx.fillStyle = innerColor;
+      ctx.fill();
+
+      // Head
+      ctx.beginPath();
+      ctx.arc(0, 0, s, 0, Math.PI * 2);
+      ctx.fillStyle = bodyColor;
+      ctx.fill();
+
+      // Muzzle
+      ctx.beginPath();
+      ctx.ellipse(0, s * 0.32, s * 0.48, s * 0.34, 0, 0, Math.PI * 2);
+      ctx.fillStyle = innerColor;
+      ctx.fill();
+
+      // Left eye
+      ctx.beginPath();
+      ctx.arc(-s * 0.32, -s * 0.18, s * 0.12, 0, Math.PI * 2);
+      ctx.fillStyle = darkColor;
+      ctx.fill();
+
+      // Right eye
+      ctx.beginPath();
+      ctx.arc(s * 0.32, -s * 0.18, s * 0.12, 0, Math.PI * 2);
+      ctx.fillStyle = darkColor;
+      ctx.fill();
+
+      // Nose
+      ctx.beginPath();
+      ctx.ellipse(0, s * 0.2, s * 0.14, s * 0.1, 0, 0, Math.PI * 2);
+      ctx.fillStyle = darkColor;
+      ctx.fill();
+
+      break;
+    }
+    case 'emoji': {
+      const EMOJIS = ['❤️', '💕', '💖', '💗', '😍', '💋', '🌸', '💝', '🥰', '✨'];
+      const emojiIndex = Math.floor(p.phase * EMOJIS.length / (Math.PI * 2)) % EMOJIS.length;
+      const emoji = EMOJIS[Math.abs(emojiIndex)];
+
+      ctx.font = `${p.size * 2}px serif`;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(emoji, p.x, p.y);
+      break;
+    }
     case 'ember': {
       const pulse = 0.7 + 0.3 * Math.sin(p.life * 0.07 + p.phase);
       ctx.globalAlpha = Math.max(0, alpha * pulse);
