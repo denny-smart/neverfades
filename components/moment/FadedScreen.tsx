@@ -156,14 +156,14 @@ function BrokenHeartIcon() {
 // ─── Component ────────────────────────────────────────────────────────────────
 export default function FadedScreen() {
   return (
-    <div className="min-h-screen bg-void flex flex-col items-center justify-center px-6 relative overflow-hidden">
+    <div className="min-h-screen bg-void flex flex-col items-center justify-center px-6 py-16 relative overflow-hidden">
 
       {/* Deep vignette glow */}
       <div
         className="absolute inset-0 pointer-events-none"
         style={{
           background:
-            'radial-gradient(ellipse 70% 60% at 50% 40%, rgba(196,18,48,0.04) 0%, #0a0a0a 70%)',
+            'radial-gradient(ellipse 70% 60% at 50% 50%, rgba(196,18,48,0.05) 0%, #0a0a0a 70%)',
         }}
         aria-hidden="true"
       />
@@ -181,27 +181,27 @@ export default function FadedScreen() {
       <AshCanvas />
 
       {/* ── Content ── */}
-      <div className="relative z-10 max-w-sm w-full text-center flex flex-col items-center">
+      <div className="relative z-10 w-full max-w-xs text-center flex flex-col items-center mx-auto">
+
+        {/* Eyebrow — sits at the very top of the content block */}
+        <motion.p
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.7, delay: 0.4 }}
+          className="font-body text-[9px] tracking-[0.42em] uppercase text-crimson mb-7"
+        >
+          lovethatneverfades
+        </motion.p>
 
         {/* Broken heart */}
         <motion.div
           initial={{ opacity: 0, scale: 0.4, y: 8 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
-          transition={{ duration: 1.4, ease: [0.16, 1, 0.3, 1] }}
-          className="mb-10"
+          transition={{ duration: 1.4, delay: 0.6, ease: [0.16, 1, 0.3, 1] }}
+          className="mb-8"
         >
           <BrokenHeartIcon />
         </motion.div>
-
-        {/* Eyebrow */}
-        <motion.p
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.7, delay: 0.9 }}
-          className="font-body text-[9px] tracking-[0.42em] uppercase text-crimson mb-6"
-        >
-          lovethatneverfades
-        </motion.p>
 
         {/* Hairline */}
         <motion.div
@@ -229,7 +229,7 @@ export default function FadedScreen() {
           initial={{ opacity: 0, y: 14 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 1.0, delay: 1.85, ease: [0.16, 1, 0.3, 1] }}
-          className="font-body text-sm text-white/35 leading-relaxed mb-12 max-w-xs mx-auto"
+          className="font-body text-sm text-white/35 leading-relaxed mb-10 max-w-[260px] mx-auto"
         >
           But it still exists between you both — in the place where things
           are truly felt.
@@ -240,8 +240,8 @@ export default function FadedScreen() {
           initial={{ scaleX: 0 }}
           animate={{ scaleX: 1 }}
           transition={{ duration: 0.9, delay: 2.4, ease: [0.16, 1, 0.3, 1] }}
-          className="w-full h-px mb-12 origin-left"
-          style={{ background: 'linear-gradient(90deg, rgba(196,18,48,0.3), transparent)' }}
+          className="w-full h-px mb-9 origin-center"
+          style={{ background: 'linear-gradient(90deg, transparent, rgba(196,18,48,0.35), transparent)' }}
         />
 
         {/* CTA */}
@@ -249,7 +249,7 @@ export default function FadedScreen() {
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.85, delay: 2.7, ease: [0.16, 1, 0.3, 1] }}
-          className="flex flex-col items-center gap-4"
+          className="flex flex-col items-center gap-4 w-full"
         >
           <p className="font-body text-[9px] tracking-[0.3em] uppercase text-white/25">
             Pass the feeling forward
@@ -278,16 +278,6 @@ export default function FadedScreen() {
             </Link>
           </motion.div>
         </motion.div>
-
-        {/* Brand mark */}
-        <motion.p
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 0.3 }}
-          transition={{ duration: 1.8, delay: 3.8 }}
-          className="font-body text-[9px] tracking-[0.4em] uppercase text-white/30 mt-14"
-        >
-          lovethatneverfades
-        </motion.p>
       </div>
     </div>
   );
