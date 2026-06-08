@@ -6,21 +6,19 @@ import RevealSequence from './RevealSequence';
 import FadedScreen from './FadedScreen';
 import { motion, AnimatePresence } from 'framer-motion';
 
-// ── Session helpers ────────────────────────────────────────────────────────
-const SESSION_KEY = 'nf_session_id';
-
-function getOrCreateSessionId(): string {
+// ── Per-load view token ───────────────────────────────────────────────────
+// A new UUID is generated on every mount (i.e. every page load / reload).
+// This means each visit — including reloads — consumes one of the 10 views.
+function generateLoadToken(): string {
   if (typeof window === 'undefined') return '';
-  let id = localStorage.getItem(SESSION_KEY);
-  if (!id) {
-    // Generate RFC-4122 v4 UUID
-    id = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
-      const r = (Math.random() * 16) | 0;
-      return (c === 'x' ? r : (r & 0x3) | 0x8).toString(16);
-    });
-    localStorage.setItem(SESSION_KEY, id);
+  if (typeof crypto !== 'undefined' && crypto.randomUUID) {
+    return crypto.randomUUID();
   }
-  return id;
+  // Fallback for older environments
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
+    const r = (Math.random() * 16) | 0;
+    return (c === 'x' ? r : (r & 0x3) | 0x8).toString(16);
+  });
 }
 
 // ── Extended Moment type to accommodate analytics fields ──
@@ -48,12 +46,14 @@ export default function MomentViewClient({
   const [error, setError] = useState('');
   const mountTimeRef = useRef<number>(Date.now());
   const hasRecordedRef = useRef(false);
+  // Stable per-load token — new on every mount/reload
+  const loadTokenRef = useRef<string>(generateLoadToken());
 
   const recordView = useCallback(async () => {
     if (hasRecordedRef.current) return;
     hasRecordedRef.current = true;
 
-    const sessionId = getOrCreateSessionId();
+    const sessionId = loadTokenRef.current;
     if (!sessionId) {
       setLoading(false);
       return;
