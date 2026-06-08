@@ -87,7 +87,7 @@ export default function CreatePageClient() {
               Seal your moment
             </h1>
             <p className="font-body text-xs text-white/35 tracking-wide">
-              A single link. Ten views. One emotion that outlasts both.
+              A single link. Five views. One emotion that outlasts both.
             </p>
           </div>
 

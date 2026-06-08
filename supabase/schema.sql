@@ -1,5 +1,5 @@
 -- ============================================================
--- NeverFades — Supabase SQL Schema
+-- NeverFades - Supabase SQL Schema
 -- Run this in your Supabase SQL Editor (Dashboard > SQL Editor)
 -- ============================================================
 
@@ -11,17 +11,31 @@ CREATE TABLE IF NOT EXISTS moments (
   sender_name VARCHAR NOT NULL,
   message TEXT NOT NULL,
   theme_id VARCHAR NOT NULL,
-  view_count INT DEFAULT 0,
-  max_views INT DEFAULT 5,
-  is_active BOOLEAN DEFAULT true,
+  view_count INT NOT NULL DEFAULT 0,
+  max_views INT NOT NULL DEFAULT 5,
+  is_active BOOLEAN NOT NULL DEFAULT true,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
+  first_viewed_at TIMESTAMP WITH TIME ZONE,
+  last_viewed_at TIMESTAMP WITH TIME ZONE,
+  CONSTRAINT moments_max_views_is_five CHECK (max_views = 5),
+  CONSTRAINT moments_view_count_between_zero_and_five CHECK (view_count BETWEEN 0 AND 5)
+);
+
+-- Indexes for fast lookups and analytics
+CREATE INDEX IF NOT EXISTS moments_slug_idx ON moments(slug);
+
+CREATE TABLE IF NOT EXISTS moment_views (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  moment_id UUID NOT NULL REFERENCES moments(id) ON DELETE CASCADE,
+  session_id UUID NOT NULL,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
 
--- Index for fast slug lookups
-CREATE INDEX IF NOT EXISTS moments_slug_idx ON moments(slug);
+CREATE INDEX IF NOT EXISTS moment_views_moment_idx ON moment_views(moment_id);
 
--- RPC function for atomic view increment (prevents race conditions)
-CREATE OR REPLACE FUNCTION increment_view_count(moment_slug VARCHAR)
+-- Atomic view increment. Each page load sends a fresh UUID, so every load
+-- consumes one view until the moment reaches its 5-view lifetime.
+CREATE OR REPLACE FUNCTION increment_view_count(moment_slug VARCHAR, client_session_id UUID)
 RETURNS TABLE (
   id UUID,
   slug VARCHAR,
@@ -32,24 +46,41 @@ RETURNS TABLE (
   view_count INT,
   max_views INT,
   is_active BOOLEAN,
-  created_at TIMESTAMP WITH TIME ZONE
+  created_at TIMESTAMP WITH TIME ZONE,
+  first_viewed_at TIMESTAMP WITH TIME ZONE,
+  last_viewed_at TIMESTAMP WITH TIME ZONE
 )
 LANGUAGE plpgsql
 AS $$
 DECLARE
   moment_record moments%ROWTYPE;
+  now_time TIMESTAMP WITH TIME ZONE := timezone('utc'::text, now());
 BEGIN
-  -- Lock the row and increment
+  SELECT * INTO moment_record
+  FROM moments
+  WHERE moments.slug = moment_slug
+  FOR UPDATE;
+
+  IF NOT FOUND THEN
+    RETURN;
+  END IF;
+
+  IF NOT moment_record.is_active OR moment_record.view_count >= 5 THEN
+    RETURN;
+  END IF;
+
+  INSERT INTO moment_views (moment_id, session_id, created_at)
+  VALUES (moment_record.id, client_session_id, now_time);
+
   UPDATE moments m
   SET
-    view_count = m.view_count + 1,
-    is_active = CASE WHEN m.view_count + 1 >= m.max_views THEN false ELSE m.is_active END
-  WHERE m.slug = moment_slug
-    AND m.is_active = true
-    AND m.view_count < m.max_views
+    view_count = LEAST(m.view_count + 1, 5),
+    first_viewed_at = COALESCE(m.first_viewed_at, now_time),
+    last_viewed_at = now_time,
+    is_active = CASE WHEN m.view_count + 1 >= 5 THEN false ELSE m.is_active END
+  WHERE m.id = moment_record.id
   RETURNING m.* INTO moment_record;
 
-  -- Return the updated row
   RETURN QUERY SELECT
     moment_record.id,
     moment_record.slug,
@@ -60,25 +91,29 @@ BEGIN
     moment_record.view_count,
     moment_record.max_views,
     moment_record.is_active,
-    moment_record.created_at;
+    moment_record.created_at,
+    moment_record.first_viewed_at,
+    moment_record.last_viewed_at;
 END;
 $$;
 
 -- Enable Row Level Security
 ALTER TABLE moments ENABLE ROW LEVEL SECURITY;
 
--- Policy: anyone can read moments (for public reveal pages)
+DROP POLICY IF EXISTS "Public read moments" ON moments;
 CREATE POLICY "Public read moments"
   ON moments FOR SELECT
-  USING (true);
+  USING (is_active = true AND view_count < 5 AND max_views = 5);
 
--- Policy: anyone can insert moments (anonymous creation)
+DROP POLICY IF EXISTS "Public insert moments" ON moments;
 CREATE POLICY "Public insert moments"
   ON moments FOR INSERT
-  WITH CHECK (true);
+  WITH CHECK (max_views = 5 AND view_count = 0);
+
+ALTER TABLE moment_views ENABLE ROW LEVEL SECURITY;
 
 -- ============================================================
--- Future-ready tables (structure only — do not implement yet)
+-- Future-ready tables (structure only - do not implement yet)
 -- ============================================================
 
 CREATE TABLE IF NOT EXISTS users (

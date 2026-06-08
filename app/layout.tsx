@@ -20,7 +20,7 @@ const inter = Inter({
 export const metadata: Metadata = {
   title: 'NeverFades — A love that never does',
   description:
-    'Create a digital moment that fades. For a love that never does. Share a cinematic, scarce keepsake that disappears after 10 views.',
+    'Create a digital moment that fades. For a love that never does. Share a cinematic, scarce keepsake that disappears after 5 views.',
   keywords: ['love message', 'digital keepsake', 'ephemeral', 'romantic'],
   openGraph: {
     title: 'NeverFades',

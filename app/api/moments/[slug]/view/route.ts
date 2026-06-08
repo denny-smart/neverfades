@@ -55,7 +55,7 @@ export async function POST(
 
     // If the view count reached limit before this view, it would have returned no rows.
     // If it reached limit DURING this view, moment.is_active is false but we return the content
-    // for this final 10th view.
+    // for this final 5th view.
     return NextResponse.json(
       {
         faded: false,

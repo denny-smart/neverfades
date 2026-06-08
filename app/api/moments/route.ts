@@ -3,6 +3,8 @@ import { supabaseAdmin } from '@/lib/supabase/server';
 import { generateSlug } from '@/lib/utils/slug';
 import { CreateMomentInput } from '@/lib/types';
 
+const MAX_MOMENT_VIEWS = 5;
+
 export async function POST(req: NextRequest) {
   try {
     const body: CreateMomentInput = await req.json();
@@ -33,6 +35,7 @@ export async function POST(req: NextRequest) {
         sender_name: sender_name.trim(),
         message: message.trim(),
         theme_id,
+        max_views: MAX_MOMENT_VIEWS,
       })
       .select('slug')
       .single();
