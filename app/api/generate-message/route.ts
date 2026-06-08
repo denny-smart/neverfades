@@ -32,7 +32,8 @@ export async function POST(req: Request) {
       - Write a beautiful, poetic, and highly evocative message.
       - Do NOT include any subject lines, titles, or formal introductory text like "Dear ${partnerName}," or signature text like "Love, ${senderName}." The app UI already displays who it is from and to.
       - Start directly with the core message/body.
-      - Keep the length under 450 characters so it fits the cinematic screen.
+      - Keep the total length between 150 and 400 characters (max 450 characters) so it fits the cinematic screen.
+      - Ensure the message is fully completed, ends with a proper sentence or exclamation mark, and does NOT cut off in the middle of a sentence or thought.
       - Match the selected vibe: "${vibe}".
     `;
 
@@ -47,7 +48,7 @@ export async function POST(req: Request) {
         contents: [{ parts: [{ text: prompt }] }],
         generationConfig: {
           temperature: 0.82,
-          maxOutputTokens: 300,
+          maxOutputTokens: 800,
         },
       }),
     });
