@@ -263,11 +263,12 @@ export default function FadedScreen() {
               ],
             }}
             transition={{ duration: 2.8, repeat: Infinity, ease: 'easeInOut' }}
+            className="rounded-full overflow-hidden"
           >
             <Link
               href="/create"
               id="btn-faded-create"
-              className="group relative inline-flex items-center justify-center px-10 py-4 bg-crimson text-white font-body text-[11px] tracking-[0.28em] uppercase overflow-hidden transition-all duration-500 hover:bg-rose hover:scale-[1.03]"
+              className="group relative inline-flex items-center justify-center px-14 py-5 bg-crimson text-white font-body text-[12px] tracking-[0.28em] uppercase overflow-hidden transition-all duration-500 hover:bg-rose hover:scale-[1.03] rounded-full"
             >
               <span
                 className="absolute inset-0 translate-x-[-110%] group-hover:translate-x-[110%] transition-transform duration-700 skew-x-[-18deg]"

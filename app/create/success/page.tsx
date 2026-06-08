@@ -226,7 +226,7 @@ function SuccessContent() {
               onClick={handleCopy}
               whileHover={{ scale: 1.04 }}
               whileTap={{ scale: 0.96 }}
-              className="font-body text-[10px] tracking-[0.28em] uppercase px-5 py-2.5 rounded-full text-white whitespace-nowrap transition-all duration-300 flex-shrink-0"
+              className="font-body text-[11px] tracking-[0.28em] uppercase px-7 py-3 rounded-full text-white whitespace-nowrap transition-all duration-300 flex-shrink-0"
               style={{
                 background: copied ? 'rgba(255,255,255,0.15)' : theme.palette.primary,
                 boxShadow:  copied ? 'none' : `0 4px 16px ${theme.palette.primary}40`,

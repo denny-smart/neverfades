@@ -268,7 +268,7 @@ export default function CreationForm({ activeThemeId, onThemeChange }: CreationF
                 <button
                   type="button"
                   onClick={() => setShowAiHelper(!showAiHelper)}
-                  className="flex items-center gap-2 px-4 py-2 rounded-full border font-body text-[9px] uppercase tracking-widest transition-all duration-300"
+                  className="flex items-center gap-2.5 px-6 py-3 rounded-full border font-body text-[10px] uppercase tracking-widest transition-all duration-300"
                   style={{
                     background: showAiHelper ? 'rgba(255,255,255,0.1)' : 'rgba(255,255,255,0.03)',
                     borderColor: showAiHelper ? `${theme.palette.primary}50` : 'rgba(255,255,255,0.08)',
@@ -303,7 +303,7 @@ export default function CreationForm({ activeThemeId, onThemeChange }: CreationF
                             key={v}
                             type="button"
                             onClick={(e) => { e.preventDefault(); setAiVibe(v); }}
-                            className="py-2 rounded-full font-body text-[8px] uppercase tracking-wider transition-all duration-300 border"
+                            className="py-3 rounded-full font-body text-[9px] uppercase tracking-wider transition-all duration-300 border"
                             style={{
                               backgroundColor: aiVibe === v ? theme.palette.primary : 'rgba(255,255,255,0.04)',
                               borderColor: aiVibe === v ? theme.palette.primary : 'rgba(255,255,255,0.08)',
@@ -337,7 +337,7 @@ export default function CreationForm({ activeThemeId, onThemeChange }: CreationF
                       type="button"
                       disabled={generating}
                       onClick={(e) => { e.preventDefault(); generateAiMessage(); }}
-                      className="w-full py-3 rounded-full font-body text-[9px] uppercase tracking-[0.25em] text-white flex items-center justify-center gap-2 transition-all duration-300 disabled:opacity-50"
+                      className="w-full py-4 rounded-full font-body text-[10px] uppercase tracking-[0.25em] text-white flex items-center justify-center gap-2 transition-all duration-300 disabled:opacity-50"
                       style={{
                         background: theme.palette.primary,
                         boxShadow: `0 4px 16px ${theme.palette.primary}35`,
@@ -471,7 +471,7 @@ export default function CreationForm({ activeThemeId, onThemeChange }: CreationF
               disabled={isDisabled()}
               whileHover={!isDisabled() ? { scale: 1.04 } : {}}
               whileTap={!isDisabled() ? { scale: 0.97 } : {}}
-              className="px-10 py-3.5 rounded-full font-body text-[10px] tracking-[0.3em] uppercase disabled:cursor-not-allowed transition-opacity duration-300"
+              className="px-14 py-4 rounded-full font-body text-[11px] tracking-[0.3em] uppercase disabled:cursor-not-allowed transition-opacity duration-300"
               style={pillStyle(isDisabled())}
             >
               Continue
@@ -483,7 +483,7 @@ export default function CreationForm({ activeThemeId, onThemeChange }: CreationF
               disabled={submitState === 'submitting'}
               whileHover={{ scale: 1.04 }}
               whileTap={{ scale: 0.97 }}
-              className="px-10 py-3.5 rounded-full font-body text-[10px] tracking-[0.3em] uppercase disabled:cursor-not-allowed"
+              className="px-14 py-4 rounded-full font-body text-[11px] tracking-[0.3em] uppercase disabled:cursor-not-allowed"
               style={pillStyle(submitState === 'submitting')}
             >
               <AnimatePresence mode="wait">
