@@ -45,6 +45,49 @@ export default function CreationForm({ activeThemeId, onThemeChange }: CreationF
   const [focused,     setFocused]     = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
+  const [aiVibe, setAiVibe] = useState('romantic');
+  const [aiKeywords, setAiKeywords] = useState('');
+  const [generating, setGenerating] = useState(false);
+  const [showAiHelper, setShowAiHelper] = useState(false);
+
+  const generateAiMessage = async () => {
+    if (generating) return;
+    setGenerating(true);
+    setError('');
+    try {
+      const res = await fetch('/api/generate-message', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          partnerName: form.partner_name,
+          senderName: form.sender_name,
+          vibe: aiVibe,
+          keywords: aiKeywords,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setError(data.error || 'Failed to generate message.');
+        return;
+      }
+      if (data.text) {
+        setForm((prev) => ({ ...prev, message: data.text }));
+        setShowAiHelper(false);
+        setTimeout(() => {
+          const el = textareaRef.current;
+          if (el) {
+            el.style.height = 'auto';
+            el.style.height = `${el.scrollHeight}px`;
+          }
+        }, 100);
+      }
+    } catch {
+      setError('Connection to AI assistant failed.');
+    } finally {
+      setGenerating(false);
+    }
+  };
+
   useEffect(() => {
     if (activeThemeId !== form.theme_id) {
       setForm(p => ({ ...p, theme_id: activeThemeId }));
@@ -211,9 +254,108 @@ export default function CreationForm({ activeThemeId, onThemeChange }: CreationF
             <motion.div key="message" variants={stepV} initial="initial" animate="animate" exit="exit"
               className="flex flex-col items-center gap-5 w-full text-center"
             >
-              <h2 className="font-display text-3xl sm:text-4xl font-light text-white leading-tight">
-                Write what your heart says…
-              </h2>
+              <div className="text-center">
+                <h2 className="font-display text-3xl sm:text-4xl font-light text-white leading-tight mb-2">
+                  Write what your heart says…
+                </h2>
+                <p className="font-body text-[9px] text-white/30 tracking-wider">
+                  Type manually or use our AI assistant to weave your emotions.
+                </p>
+              </div>
+
+              {/* AI generator toggle */}
+              <div className="flex justify-center mb-1">
+                <button
+                  type="button"
+                  onClick={() => setShowAiHelper(!showAiHelper)}
+                  className="flex items-center gap-2 px-4 py-2 rounded-full border font-body text-[9px] uppercase tracking-widest transition-all duration-300"
+                  style={{
+                    background: showAiHelper ? 'rgba(255,255,255,0.1)' : 'rgba(255,255,255,0.03)',
+                    borderColor: showAiHelper ? `${theme.palette.primary}50` : 'rgba(255,255,255,0.08)',
+                    color: showAiHelper ? '#fff' : 'rgba(255,255,255,0.6)',
+                    boxShadow: showAiHelper ? `0 0 15px ${theme.palette.primary}20` : 'none',
+                  }}
+                >
+                  <span>✨ {showAiHelper ? 'Close AI Assistant' : 'Assist with AI'}</span>
+                </button>
+              </div>
+
+              <AnimatePresence mode="wait">
+                {showAiHelper && (
+                  <motion.div
+                    initial={{ opacity: 0, height: 0, y: -8 }}
+                    animate={{ opacity: 1, height: 'auto', y: 0 }}
+                    exit={{ opacity: 0, height: 0, y: -8 }}
+                    transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+                    className="w-full overflow-hidden flex flex-col gap-4 p-5 rounded-2xl border backdrop-blur-md text-left"
+                    style={{
+                      background: 'rgba(0,0,0,0.4)',
+                      borderColor: `${theme.palette.primary}25`,
+                      maxWidth: 440,
+                      boxShadow: `0 0 35px ${theme.palette.primary}12`,
+                    }}
+                  >
+                    <div className="flex flex-col gap-2 w-full">
+                      <span className="font-body text-[8px] tracking-[0.2em] uppercase text-white/40">Select Vibe</span>
+                      <div className="grid grid-cols-4 gap-2 w-full">
+                        {['romantic', 'poetic', 'playful', 'deep'].map((v) => (
+                          <button
+                            key={v}
+                            type="button"
+                            onClick={(e) => { e.preventDefault(); setAiVibe(v); }}
+                            className="py-2 rounded-full font-body text-[8px] uppercase tracking-wider transition-all duration-300 border"
+                            style={{
+                              backgroundColor: aiVibe === v ? theme.palette.primary : 'rgba(255,255,255,0.04)',
+                              borderColor: aiVibe === v ? theme.palette.primary : 'rgba(255,255,255,0.08)',
+                              color: aiVibe === v ? '#fff' : 'rgba(255,255,255,0.5)',
+                              boxShadow: aiVibe === v ? `0 2px 8px ${theme.palette.primary}35` : 'none',
+                            }}
+                          >
+                            {v}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div className="flex flex-col gap-2 w-full">
+                      <span className="font-body text-[8px] tracking-[0.2em] uppercase text-white/40">Memory Prompt / Keywords</span>
+                      <input
+                        type="text"
+                        placeholder="e.g. coffee on a rainy night, first gaze, smile"
+                        value={aiKeywords}
+                        onChange={(e) => setAiKeywords(e.target.value)}
+                        className="w-full bg-transparent border-b text-white font-body text-xs py-2 focus:outline-none placeholder:text-white/20 transition-all duration-300"
+                        style={{
+                          borderColor: focused ? theme.palette.primary : 'rgba(255,255,255,0.12)',
+                        }}
+                        onFocus={() => setFocused(true)}
+                        onBlur={() => setFocused(false)}
+                      />
+                    </div>
+
+                    <button
+                      type="button"
+                      disabled={generating}
+                      onClick={(e) => { e.preventDefault(); generateAiMessage(); }}
+                      className="w-full py-3 rounded-full font-body text-[9px] uppercase tracking-[0.25em] text-white flex items-center justify-center gap-2 transition-all duration-300 disabled:opacity-50"
+                      style={{
+                        background: theme.palette.primary,
+                        boxShadow: `0 4px 16px ${theme.palette.primary}35`,
+                      }}
+                    >
+                      {generating ? (
+                        <>
+                          <span className="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                          Weaving emotions…
+                        </>
+                      ) : (
+                        'Generate Beautiful Message'
+                      )}
+                    </button>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+
               <div
                 className="relative w-full rounded-2xl border backdrop-blur-sm px-6 pt-6 pb-4 transition-all duration-400"
                 style={{
