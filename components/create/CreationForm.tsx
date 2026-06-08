@@ -126,7 +126,9 @@ export default function CreationForm({ activeThemeId, onThemeChange }: CreationF
       const res  = await fetch('/api/moments', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(form) });
       const data = await res.json();
       if (!res.ok) { setError(data.error ?? 'Something went wrong.'); setSubmitState('error'); return; }
-      router.push(`/create/success?slug=${data.slug}&theme=${form.theme_id}`);
+      router.push(`/create/success?slug=${data.slug}&theme=${form.theme_id}`, {
+        transitionTypes: ['nav-forward'],
+      });
     } catch { setError('Could not reach the server.'); setSubmitState('error'); }
   };
 

@@ -135,6 +135,115 @@ body {
 }
 
 /* ── Canvas full screen ── */
+::view-transition-group(.moment-forward),
+::view-transition-group(.moment-back),
+::view-transition-group(.moment-soft) {
+  animation-duration: 360ms;
+  animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+::view-transition-old(.moment-forward) {
+  animation: moment-forward-old 360ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+::view-transition-new(.moment-forward) {
+  animation: moment-forward-new 360ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+::view-transition-old(.moment-back) {
+  animation: moment-back-old 340ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+::view-transition-new(.moment-back) {
+  animation: moment-back-new 340ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+::view-transition-old(.moment-soft) {
+  animation: moment-soft-old 280ms ease both;
+}
+
+::view-transition-new(.moment-soft) {
+  animation: moment-soft-new 320ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes moment-forward-old {
+  from { opacity: 1; transform: translateX(0) scale(1); filter: blur(0); }
+  to { opacity: 0; transform: translateX(-18px) scale(0.985); filter: blur(3px); }
+}
+
+@keyframes moment-forward-new {
+  from { opacity: 0; transform: translateX(22px) scale(1.01); filter: blur(4px); }
+  to { opacity: 1; transform: translateX(0) scale(1); filter: blur(0); }
+}
+
+@keyframes moment-back-old {
+  from { opacity: 1; transform: translateX(0) scale(1); filter: blur(0); }
+  to { opacity: 0; transform: translateX(16px) scale(0.99); filter: blur(3px); }
+}
+
+@keyframes moment-back-new {
+  from { opacity: 0; transform: translateX(-20px) scale(1.005); filter: blur(4px); }
+  to { opacity: 1; transform: translateX(0) scale(1); filter: blur(0); }
+}
+
+@keyframes moment-soft-old {
+  from { opacity: 1; filter: blur(0); }
+  to { opacity: 0; filter: blur(2px); }
+}
+
+@keyframes moment-soft-new {
+  from { opacity: 0; transform: translateY(8px); filter: blur(3px); }
+  to { opacity: 1; transform: translateY(0); filter: blur(0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-old(*),
+  ::view-transition-new(*),
+  ::view-transition-group(*) {
+    animation-duration: 180ms;
+  }
+
+  ::view-transition-old(.moment-forward),
+  ::view-transition-old(.moment-back),
+  ::view-transition-old(.moment-soft) {
+    animation-name: moment-soft-old;
+  }
+
+  ::view-transition-new(.moment-forward),
+  ::view-transition-new(.moment-back),
+  ::view-transition-new(.moment-soft) {
+    animation-name: moment-soft-new;
+  }
+}
+
+.moment-loader-mark {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+}
+
+.moment-loader-mark span {
+  width: 0.375rem;
+  height: 0.375rem;
+  border-radius: 999px;
+  background: #c41230;
+  box-shadow: 0 0 10px rgba(196, 18, 48, 0.65);
+  animation: moment-loader-pulse 1.45s ease-in-out infinite;
+}
+
+.moment-loader-mark span:nth-child(2) {
+  animation-delay: 160ms;
+}
+
+.moment-loader-mark span:nth-child(3) {
+  animation-delay: 320ms;
+}
+
+@keyframes moment-loader-pulse {
+  0%, 100% { opacity: 0.18; transform: scale(0.8); }
+  50% { opacity: 0.95; transform: scale(1.22); }
+}
+
 canvas.atmosphere-canvas {
   position: fixed;
   inset: 0;

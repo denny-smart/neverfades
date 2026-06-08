@@ -93,6 +93,7 @@ function SuccessContent() {
       >
         <Link
           href="/"
+          transitionTypes={['nav-back']}
           className="flex items-center gap-2 font-body text-[10px] tracking-[0.2em] uppercase text-white/35 hover:text-white/75 transition-colors duration-300"
         >
           <svg
@@ -401,6 +402,7 @@ function SuccessContent() {
         >
           <Link
             href="/create"
+            transitionTypes={['nav-back']}
             id="btn-create-another"
             className="group inline-flex items-center gap-2 font-body text-[10px] tracking-[0.28em] uppercase text-white/30 hover:text-white/70 transition-colors duration-400"
           >

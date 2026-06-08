@@ -28,6 +28,7 @@ export default function CreatePageClient() {
       >
         <Link
           href="/"
+          transitionTypes={['nav-back']}
           className="flex items-center gap-2 font-body text-[10px] tracking-[0.2em] uppercase text-white/35 hover:text-white/75 transition-colors duration-300"
         >
           <svg

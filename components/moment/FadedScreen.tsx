@@ -267,6 +267,7 @@ export default function FadedScreen() {
           >
             <Link
               href="/create"
+              transitionTypes={['nav-forward']}
               id="btn-faded-create"
               className="group relative inline-flex items-center justify-center px-14 py-5 bg-crimson text-white font-body text-[12px] tracking-[0.28em] uppercase overflow-hidden transition-all duration-500 hover:bg-rose hover:scale-[1.03] rounded-full"
             >

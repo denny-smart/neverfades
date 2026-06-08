@@ -125,6 +125,7 @@ export default function HeroSection() {
           >
             <Link
               href="/create"
+              transitionTypes={['nav-forward']}
               id="cta-ignite"
               className="group relative inline-flex items-center justify-center px-16 py-6 bg-crimson text-white font-body text-sm tracking-[0.25em] uppercase overflow-hidden transition-all duration-500 hover:bg-rose hover:scale-[1.03] rounded-full"
             >

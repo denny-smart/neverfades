@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { ViewTransition } from 'react';
 import { Cormorant_Garamond, Inter } from 'next/font/google';
 import './globals.css';
 
@@ -35,7 +36,23 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className={`${cormorant.variable} ${inter.variable}`}>
-      <body className="bg-void text-white antialiased">{children}</body>
+      <body className="bg-void text-white antialiased">
+        <ViewTransition
+          enter={{
+            'nav-forward': 'moment-forward',
+            'nav-back': 'moment-back',
+            default: 'moment-soft',
+          }}
+          exit={{
+            'nav-forward': 'moment-forward',
+            'nav-back': 'moment-back',
+            default: 'moment-soft',
+          }}
+          default="moment-soft"
+        >
+          {children}
+        </ViewTransition>
+      </body>
     </html>
   );
 }
