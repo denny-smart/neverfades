@@ -24,4 +24,5 @@ export interface FadeTheme {
   };
   previewGradient: string;
   signOff: string;
+  brandFooter: string;
 }

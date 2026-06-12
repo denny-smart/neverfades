@@ -25,6 +25,7 @@ export const themes: FadeTheme[] = [
     },
     previewGradient: 'linear-gradient(135deg, #0d0508 0%, #2d0a15 50%, #1a0510 100%)',
     signOff: 'with love,',
+    brandFooter: 'lovethatneverfades',
   },
   {
     id: 'magic-stars',
@@ -50,6 +51,7 @@ export const themes: FadeTheme[] = [
     },
     previewGradient: 'linear-gradient(135deg, #04050f 0%, #0d0b2a 50%, #080516 100%)',
     signOff: 'yours under the stars,',
+    brandFooter: 'constellationsoflove',
   },
   {
     id: 'love-balloons',
@@ -75,6 +77,7 @@ export const themes: FadeTheme[] = [
     },
     previewGradient: 'linear-gradient(135deg, #0a0a12 0%, #1a0a1a 50%, #120a1a 100%)',
     signOff: 'floating with love,',
+    brandFooter: 'risingtogether',
   },
   {
     id: 'sunset-glow',
@@ -100,6 +103,7 @@ export const themes: FadeTheme[] = [
     },
     previewGradient: 'linear-gradient(135deg, #0f0700 0%, #1f0f00 50%, #150800 100%)',
     signOff: 'with warm thoughts,',
+    brandFooter: 'embersinthedusk',
   },
   {
     id: 'galaxy-romance',
@@ -125,6 +129,7 @@ export const themes: FadeTheme[] = [
     },
     previewGradient: 'linear-gradient(135deg, #020408 0%, #050d1a 50%, #080210 100%)',
     signOff: 'infinitely yours,',
+    brandFooter: 'loveinfinite',
   },
   {
     id: 'teddy-love',
@@ -150,6 +155,7 @@ export const themes: FadeTheme[] = [
     },
     previewGradient: 'linear-gradient(135deg, #0d0805 0%, #1f1008 50%, #160b05 100%)',
     signOff: 'with bear hugs,',
+    brandFooter: 'cuddlesthemoment',
   },
   {
     id: 'love-emojis',
@@ -175,6 +181,7 @@ export const themes: FadeTheme[] = [
     },
     previewGradient: 'linear-gradient(135deg, #0d0510 0%, #200828 50%, #160510 100%)',
     signOff: 'with all my heart,',
+    brandFooter: 'ourlovelanguage',
   },
   {
     id: 'pink-petals',
@@ -200,6 +207,7 @@ export const themes: FadeTheme[] = [
     },
     previewGradient: 'linear-gradient(135deg, #0d0509 0%, #250a18 50%, #1a0610 100%)',
     signOff: 'softly yours,',
+    brandFooter: 'softblushdreams',
   },
   {
     id: 'white-petals',
@@ -225,6 +233,7 @@ export const themes: FadeTheme[] = [
     },
     previewGradient: 'linear-gradient(135deg, #07070a 0%, #10101a 50%, #0c0c14 100%)',
     signOff: 'with pure affection,',
+    brandFooter: 'pureandserene',
   },
   {
     id: 'golden-petals',
@@ -250,6 +259,7 @@ export const themes: FadeTheme[] = [
     },
     previewGradient: 'linear-gradient(135deg, #0a0800 0%, #1a1200 50%, #120e00 100%)',
     signOff: 'wishing you golden days,',
+    brandFooter: 'goldenhourglow',
   },
   {
     id: 'money-flow',
@@ -275,6 +285,7 @@ export const themes: FadeTheme[] = [
     },
     previewGradient: 'linear-gradient(135deg, #041c0e 0%, #0d4a25 50%, #062211 100%)',
     signOff: 'to your abundance & success,',
+    brandFooter: 'limitlessabundance',
   },
 ];
 

@@ -205,7 +205,7 @@ export default function RevealSequence({ moment }: RevealSequenceProps) {
               initial="hidden"
               animate="visible"
               exit="exit"
-              className="font-body text-xs tracking-[0.3em] uppercase text-ash-400 mb-8"
+              className="font-body text-xs tracking-[0.3em] uppercase text-ash-200 mb-8"
             >
               A moment created for you is unfolding…
             </motion.p>
@@ -233,11 +233,17 @@ export default function RevealSequence({ moment }: RevealSequenceProps) {
               <motion.h1
                 className="font-display text-5xl sm:text-6xl font-light leading-none tracking-tight"
                 style={{ color: theme.palette.primary }}
-                animate={step >= STEP_MESSAGE ? { y: [0, -3, 0] } : {}}
+                animate={{
+                  textShadow: [
+                    `0 0 12px ${theme.palette.primary}18`,
+                    `0 0 28px ${theme.palette.primary}45`,
+                    `0 0 12px ${theme.palette.primary}18`
+                  ],
+                  y: step >= STEP_MESSAGE ? [0, -3, 0] : 0
+                }}
                 transition={{
-                  duration: 5,
-                  repeat: Infinity,
-                  ease: "easeInOut"
+                  textShadow: { duration: 4, repeat: Infinity, ease: "easeInOut" },
+                  y: { duration: 5, repeat: Infinity, ease: "easeInOut" }
                 }}
               >
                 <TypewriterText
@@ -340,7 +346,7 @@ export default function RevealSequence({ moment }: RevealSequenceProps) {
               animate="visible"
               className="w-full"
             >
-              <p className="font-body text-[10px] tracking-[0.35em] uppercase text-ash-400 mb-2">
+              <p className="font-body text-[10px] tracking-[0.35em] uppercase text-ash-200 mb-2">
                 {theme.signOff}
               </p>
               <motion.p
@@ -371,11 +377,11 @@ export default function RevealSequence({ moment }: RevealSequenceProps) {
             <motion.p
               key="brand"
               initial={{ opacity: 0 }}
-              animate={{ opacity: 0.45 }}
+              animate={{ opacity: 0.65 }}
               transition={{ duration: 0.9, delay: 1.0, ease: [0.16, 1, 0.3, 1] }}
-              className="font-body text-[9px] tracking-[0.38em] uppercase text-ash-400 pt-10 w-full"
+              className="font-body text-[9px] tracking-[0.38em] uppercase text-ash-200 pt-10 w-full"
             >
-              lovethatneverfades
+              {theme.brandFooter}
             </motion.p>
           )}
         </AnimatePresence>
