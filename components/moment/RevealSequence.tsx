@@ -223,7 +223,7 @@ export default function RevealSequence({ moment }: RevealSequenceProps) {
       </AnimatePresence>
 
       {/* Central Content */}
-      <div className="relative z-10 max-w-xl w-full text-center flex flex-col items-center justify-center">
+      <motion.div layout className="relative z-10 max-w-xl w-full text-center flex flex-col items-center justify-center">
 
         {/* Step 2: Emotional Intro */}
         <AnimatePresence>
@@ -293,9 +293,10 @@ export default function RevealSequence({ moment }: RevealSequenceProps) {
         {/* Dynamic vertical connector line 1 */}
         {step >= STEP_MESSAGE && (
           <motion.div
+            layout
             initial={{ height: 0, opacity: 0 }}
             animate={{ height: 32, opacity: 0.35 }}
-            transition={{ duration: 1.5, ease: 'easeOut' }}
+            transition={{ duration: 0.8, ease: 'easeOut' }}
             className="w-px my-6"
             style={{ background: `linear-gradient(to bottom, ${theme.palette.primary}, transparent)` }}
           />
@@ -305,6 +306,7 @@ export default function RevealSequence({ moment }: RevealSequenceProps) {
         <AnimatePresence>
           {step >= STEP_MESSAGE && (
             <motion.div
+              layout
               key="message-container"
               variants={fadeUp}
               initial="hidden"
@@ -357,9 +359,10 @@ export default function RevealSequence({ moment }: RevealSequenceProps) {
         {/* Dynamic vertical connector line 2 */}
         {step >= STEP_SIGNATURE && (
           <motion.div
+            layout
             initial={{ height: 0, opacity: 0 }}
             animate={{ height: 32, opacity: 0.25 }}
-            transition={{ duration: 1.5, delay: 0.2, ease: 'easeOut' }}
+            transition={{ duration: 0.8, delay: 0.1, ease: 'easeOut' }}
             className="w-px my-6"
             style={{ background: `linear-gradient(to bottom, transparent, ${theme.palette.primary})` }}
           />
@@ -369,6 +372,7 @@ export default function RevealSequence({ moment }: RevealSequenceProps) {
         <AnimatePresence>
           {step >= STEP_SIGNATURE && (
             <motion.div
+              layout
               key="signature"
               variants={signatureVariants}
               initial="hidden"
@@ -404,17 +408,18 @@ export default function RevealSequence({ moment }: RevealSequenceProps) {
         <AnimatePresence>
           {step >= STEP_ATMOSPHERE && (
             <motion.p
+              layout
               key="brand"
               initial={{ opacity: 0 }}
               animate={{ opacity: 0.65 }}
-              transition={{ duration: 0.9, delay: 1.0, ease: [0.16, 1, 0.3, 1] }}
+              transition={{ duration: 0.9, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
               className="font-body text-[9px] tracking-[0.38em] uppercase text-ash-200 pt-10 w-full"
             >
               {theme.brandFooter}
             </motion.p>
           )}
         </AnimatePresence>
-      </div>
+      </motion.div>
     </div>
   );
 }

@@ -33,7 +33,7 @@ interface MomentViewClientProps {
   initialFaded: boolean;
 }
 
-const ENGAGEMENT_MIN_MS = 3000; // Must be on page ≥3 seconds before view is counted
+const ENGAGEMENT_MIN_MS = 1000; // Must be on page ≥1 second before view is counted
 
 export default function MomentViewClient({
   slug,
@@ -116,87 +116,103 @@ export default function MomentViewClient({
     recordView();
   }, [recordView, initialFaded]);
 
-  // ─── Loading state ───────────────────────────────────────────────────────
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-void flex flex-col items-center justify-center gap-8 relative overflow-hidden">
-        {/* Soft radial glow */}
-        <div
-          className="absolute inset-0 pointer-events-none"
-          style={{
-            background: 'radial-gradient(ellipse 55% 45% at 50% 50%, rgba(196,18,48,0.05) 0%, transparent 70%)',
-          }}
-          aria-hidden="true"
-        />
-
-        {/* Breathing pulse trio */}
+  return (
+    <AnimatePresence mode="wait">
+      {loading ? (
         <motion.div
+          key="loading"
+          initial={{ opacity: 1 }}
+          exit={{ opacity: 0, transition: { duration: 0.5, ease: 'easeInOut' } }}
+          className="min-h-screen bg-void flex flex-col items-center justify-center gap-8 relative overflow-hidden w-full"
+        >
+          {/* Soft radial glow */}
+          <div
+            className="absolute inset-0 pointer-events-none"
+            style={{
+              background: 'radial-gradient(ellipse 55% 45% at 50% 50%, rgba(196,18,48,0.05) 0%, transparent 70%)',
+            }}
+            aria-hidden="true"
+          />
+
+          {/* Breathing pulse trio */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
+            className="flex items-center gap-3"
+          >
+            {[0, 1, 2].map((i) => (
+              <motion.div
+                key={i}
+                className="w-1.5 h-1.5 rounded-full bg-crimson"
+                animate={{
+                  opacity: [0.15, 0.85, 0.15],
+                  scale:   [0.85, 1.2,  0.85],
+                }}
+                transition={{
+                  duration: 1.6,
+                  delay:    i * 0.28,
+                  repeat:   Infinity,
+                  ease:     'easeInOut',
+                }}
+                style={{ boxShadow: '0 0 8px rgba(196,18,48,0.6)' }}
+              />
+            ))}
+          </motion.div>
+
+          {/* Poetic loading copy */}
+          <motion.div
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 1.0, delay: 0.5, ease: [0.16, 1, 0.3, 1] }}
+            className="text-center flex flex-col items-center gap-2"
+          >
+            <p className="font-body text-[10px] tracking-[0.38em] uppercase text-ash-400">
+              A moment is unfolding…
+            </p>
+            <p className="font-display text-sm text-white/18 italic font-light">
+              Something was created just for you
+            </p>
+          </motion.div>
+        </motion.div>
+      ) : error ? (
+        <motion.div
+          key="error"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
-          className="flex items-center gap-3"
+          exit={{ opacity: 0 }}
+          className="min-h-screen bg-void flex items-center justify-center px-6 w-full"
         >
-          {[0, 1, 2].map((i) => (
-            <motion.div
-              key={i}
-              className="w-1.5 h-1.5 rounded-full bg-crimson"
-              animate={{
-                opacity: [0.15, 0.85, 0.15],
-                scale:   [0.85, 1.2,  0.85],
-              }}
-              transition={{
-                duration: 1.6,
-                delay:    i * 0.28,
-                repeat:   Infinity,
-                ease:     'easeInOut',
-              }}
-              style={{ boxShadow: '0 0 8px rgba(196,18,48,0.6)' }}
-            />
-          ))}
+          <div className="text-center max-w-md">
+            <p className="text-3xl mb-6">🌑</p>
+            <h1 className="font-display text-2xl text-white mb-3 font-light">
+              Moment not found
+            </h1>
+            <p className="font-body text-sm text-ash-400">{error}</p>
+          </div>
         </motion.div>
-
-        {/* Poetic loading copy */}
+      ) : faded || !moment ? (
         <motion.div
-          initial={{ opacity: 0, y: 8 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 1.0, delay: 0.5, ease: [0.16, 1, 0.3, 1] }}
-          className="text-center flex flex-col items-center gap-2"
+          key="faded"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="w-full"
         >
-          <p className="font-body text-[10px] tracking-[0.38em] uppercase text-ash-400">
-            A moment is unfolding…
-          </p>
-          <p className="font-display text-sm text-white/18 italic font-light">
-            Something was created just for you
-          </p>
+          <FadedScreen />
         </motion.div>
-      </div>
-    );
-  }
-
-  // ─── Error state ─────────────────────────────────────────────────────────
-  if (error) {
-    return (
-      <div className="min-h-screen bg-void flex items-center justify-center px-6">
-        <div className="text-center max-w-md">
-          <p className="text-3xl mb-6">🌑</p>
-          <h1 className="font-display text-2xl text-white mb-3 font-light">
-            Moment not found
-          </h1>
-          <p className="font-body text-sm text-ash-400">{error}</p>
-        </div>
-      </div>
-    );
-  }
-
-  // ─── Faded state ─────────────────────────────────────────────────────────
-  if (faded || !moment) {
-    return <FadedScreen />;
-  }
-
-  // ─── Reveal ──────────────────────────────────────────────────────────────
-  return (
-    <AnimatePresence>
-      <RevealSequence moment={moment} />
+      ) : (
+        <motion.div
+          key="reveal"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.6, ease: 'easeOut' }}
+          className="w-full"
+        >
+          <RevealSequence moment={moment} />
+        </motion.div>
+      )}
     </AnimatePresence>
   );
 }
