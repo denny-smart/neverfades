@@ -223,24 +223,29 @@ export default function FadedScreen() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 1.2, delay: 1.3, ease: [0.16, 1, 0.3, 1] }}
-          className="font-display text-4xl sm:text-5xl font-light text-white mb-5 leading-tight"
+          className="font-display text-4xl sm:text-5xl font-light text-white mb-3 leading-tight"
         >
-          Someone thought of you
-          <br />
-          <span className="text-gradient-crimson italic">enough to build this.</span>
-          <br />
-          <span className="text-white/70 text-3xl sm:text-4xl">That part does not expire.</span>
+          Someone built this for you.
         </motion.h1>
+
+        {/* Italic accent — emotional exhale after the headline */}
+        <motion.p
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 1.0, delay: 1.7, ease: [0.16, 1, 0.3, 1] }}
+          className="font-display text-2xl sm:text-3xl italic text-gradient-crimson mb-8 leading-snug"
+        >
+          That is a rare thing.
+        </motion.p>
 
         {/* Sub-copy */}
         <motion.p
           initial={{ opacity: 0, y: 14 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 1.0, delay: 1.85, ease: [0.16, 1, 0.3, 1] }}
-          className="font-body text-sm text-white/55 leading-relaxed mb-10 max-w-[260px] mx-auto"
+          transition={{ duration: 1.0, delay: 2.1, ease: [0.16, 1, 0.3, 1] }}
+          className="font-body text-[14px] text-white/50 leading-loose mb-10 max-w-[240px] mx-auto"
         >
-          The page has cleared. What it carried has not. It lives now
-          between you and the person who made it, safe and entirely private.
+          The page has done its job. What it carried lives with you now, safe, private, and theirs to give only once.
         </motion.p>
 
         {/* Divider */}
@@ -259,8 +264,8 @@ export default function FadedScreen() {
           transition={{ duration: 0.85, delay: 2.7, ease: [0.16, 1, 0.3, 1] }}
           className="flex flex-col items-center gap-4 w-full"
         >
-          <p className="font-body text-[9px] tracking-[0.3em] uppercase text-white/45">
-            Pass the feeling forward
+          <p className="font-body text-[9px] tracking-[0.35em] uppercase text-white/35">
+            They gave you theirs
           </p>
           <motion.div
             animate={{
@@ -277,14 +282,14 @@ export default function FadedScreen() {
               href="/create"
               transitionTypes={['nav-forward']}
               id="btn-faded-create"
-              className="group relative inline-flex items-center justify-center px-16 py-6 bg-crimson text-white font-body text-[13px] font-semibold tracking-[0.3em] uppercase overflow-hidden transition-all duration-500 hover:bg-rose hover:scale-[1.04] active:scale-[0.98] rounded-full"
+              className="group relative inline-flex items-center justify-center px-14 py-5 bg-crimson text-white font-body text-[12px] font-semibold tracking-[0.22em] uppercase overflow-hidden transition-all duration-500 hover:bg-rose hover:scale-[1.04] active:scale-[0.98] rounded-full"
             >
               <span
                 className="absolute inset-0 translate-x-[-110%] group-hover:translate-x-[110%] transition-transform duration-700 skew-x-[-18deg]"
                 style={{ background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.16), transparent)' }}
                 aria-hidden="true"
               />
-              <span className="relative z-10">Create your own moment</span>
+              <span className="relative z-10">Build one for someone else</span>
             </Link>
           </motion.div>
         </motion.div>
