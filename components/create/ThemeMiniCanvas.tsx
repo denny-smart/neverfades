@@ -30,6 +30,7 @@ function createMiniParticle(
   w: number,
   h: number,
   behavior: string,
+  shape: string,
   colors: string[]
 ): MiniParticle {
   const color = colors[Math.floor(Math.random() * colors.length)];
@@ -37,21 +38,29 @@ function createMiniParticle(
   const maxLife = 180 + Math.random() * 120;
 
   switch (behavior) {
-    case 'fall':
+    case 'fall': {
+      const vy = Math.random() * 0.4 + 0.25;
+      const baseSize = shape === 'money' ? (Math.random() * 8 + 8) : (Math.random() * 4.5 + 3);
+      
+      const particleMaxLife = shape === 'money' ? (h + 30) / vy : (180 + Math.random() * 120);
+      const startY = Math.random() * h;
+      const startLife = shape === 'money' ? ((startY + 15) / (h + 30)) * particleMaxLife : life;
+
       return {
         x: Math.random() * w,
-        y: Math.random() * h,
+        y: startY,
         vx: (Math.random() - 0.5) * 0.25,
-        vy: Math.random() * 0.4 + 0.25,
-        size: Math.random() * 4.5 + 3,
+        vy,
+        size: baseSize,
         opacity: Math.random() * 0.45 + 0.2,
-        life,
-        maxLife,
+        life: startLife,
+        maxLife: particleMaxLife,
         rotation: Math.random() * Math.PI * 2,
         rotationSpeed: (Math.random() - 0.5) * 0.03,
         phase: Math.random() * Math.PI * 2,
         color,
       };
+    }
     case 'drift':
       return {
         x: Math.random() * w,
@@ -313,7 +322,7 @@ export default function ThemeMiniCanvas({
     const colors = [primary, accent];
     particlesRef.current = [];
     for (let i = 0; i < MAX_PARTICLES; i++) {
-      particlesRef.current.push(createMiniParticle(w, h, motionBehavior, colors));
+      particlesRef.current.push(createMiniParticle(w, h, motionBehavior, particleShape, colors));
     }
 
     const FRAME_INTERVAL = 1000 / 30; // 30fps cap
@@ -340,7 +349,7 @@ export default function ThemeMiniCanvas({
       });
 
       while (particlesRef.current.length < MAX_PARTICLES) {
-        particlesRef.current.push(createMiniParticle(w, h, motionBehavior, colors));
+        particlesRef.current.push(createMiniParticle(w, h, motionBehavior, particleShape, colors));
       }
     };
 

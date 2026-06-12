@@ -341,7 +341,7 @@ export default function RevealSequence({ moment }: RevealSequenceProps) {
               className="w-full"
             >
               <p className="font-body text-[10px] tracking-[0.35em] uppercase text-ash-400 mb-2">
-                with love,
+                {theme.signOff}
               </p>
               <motion.p
                 className="font-display text-2xl sm:text-3xl font-light tracking-wide inline-flex items-center gap-2"

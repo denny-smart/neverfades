@@ -52,9 +52,19 @@ function createParticle(
   switch (motionBehavior) {
     case 'fall': { // Flower petals (falling downwards with wind drift)
       const depth = Math.random() * 1.0 + 0.5; // depth: 0.5 (far) to 1.5 (close)
-      const size = (Math.random() * 9 + 6) * depth;
+      
+      // Significantly larger size for money notes to make them readable and premium
+      const baseSize = config.particleShape === 'money' ? (Math.random() * 15 + 16) : (Math.random() * 9 + 6);
+      const size = baseSize * depth;
+      
       const vy = (Math.random() * 0.5 + 0.3) * depth;
       const vx = (Math.random() - 0.5) * 0.2 * depth;
+
+      // Ensure money notes fall all the way to the bottom by dynamically calculating required maxLife
+      const particleMaxLife = config.particleShape === 'money'
+        ? (canvas.height + 70) / vy
+        : maxLife;
+
       return {
         x: Math.random() * canvas.width,
         y: -30,
@@ -63,7 +73,7 @@ function createParticle(
         size,
         opacity: (Math.random() * 0.45 + 0.15) * (depth / 1.5),
         life: 0,
-        maxLife,
+        maxLife: particleMaxLife,
         rotation: Math.random() * Math.PI * 2,
         rotationSpeed: (Math.random() - 0.5) * 0.02 * (1 / depth),
         color,
@@ -492,9 +502,13 @@ export default function AtmosphereLayer({
     // Populate particles with random initial life to prevent sudden bursts
     for (let i = 0; i < MAX; i++) {
       const p = createParticle(canvas, themeEngine, colors);
-      p.life = Math.random() * p.maxLife;
-      // Stagger position
+      // Stagger position first, then align life proportionally to its starting Y coordinate
       p.y = Math.random() * canvas.height;
+      if (themeEngine.particleShape === 'money' && themeEngine.motionBehavior === 'fall') {
+        p.life = ((p.y + 30) / (canvas.height + 70)) * p.maxLife;
+      } else {
+        p.life = Math.random() * p.maxLife;
+      }
       particlesRef.current.push(p);
     }
 

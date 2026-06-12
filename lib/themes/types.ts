@@ -23,4 +23,5 @@ export interface FadeTheme {
     pauseBetweenSteps: number;
   };
   previewGradient: string;
+  signOff: string;
 }
