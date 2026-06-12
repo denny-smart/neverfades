@@ -235,6 +235,41 @@ function drawMiniParticle(
       ctx.fillText(emoji, p.x, p.y);
       break;
     }
+    case 'money': {
+      ctx.translate(p.x, p.y);
+      ctx.rotate(p.rotation);
+
+      const w = p.size * 2.4;
+      const h = p.size * 1.3;
+
+      // Base note background
+      ctx.fillStyle = p.color;
+      ctx.beginPath();
+      ctx.rect(-w / 2, -h / 2, w, h);
+      ctx.fill();
+
+      // Border
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.25)';
+      ctx.lineWidth = p.size * 0.08;
+      ctx.beginPath();
+      ctx.rect(-w / 2 + p.size * 0.1, -h / 2 + p.size * 0.1, w - p.size * 0.2, h - p.size * 0.2);
+      ctx.stroke();
+
+      // Center decorative circle/oval
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.15)';
+      ctx.beginPath();
+      ctx.ellipse(0, 0, w * 0.22, h * 0.35, 0, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Central Dollar Sign
+      ctx.fillStyle = '#ffffff';
+      ctx.font = `bold ${p.size * 0.8}px monospace`;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('$', 0, 0);
+
+      break;
+    }
     case 'ember': {
       const pulse = 0.7 + 0.3 * Math.sin(p.life * 0.07 + p.phase);
       ctx.globalAlpha = Math.max(0, alpha * pulse);

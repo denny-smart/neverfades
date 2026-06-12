@@ -383,6 +383,56 @@ function drawParticle(
       break;
     }
 
+    case 'money': {
+      const fadeAlpha = p.opacity * (1 - lifeRatio);
+      ctx.save();
+      ctx.translate(p.x, p.y);
+      ctx.rotate(p.rotation ?? 0);
+      ctx.globalAlpha = Math.max(0, fadeAlpha);
+
+      const w = p.size * 2.4;
+      const h = p.size * 1.3;
+
+      // Glow effect for money
+      ctx.shadowBlur = p.size * 0.8 * glowMult;
+      ctx.shadowColor = p.color;
+
+      // Base note background
+      ctx.fillStyle = p.color;
+      ctx.beginPath();
+      ctx.rect(-w / 2, -h / 2, w, h);
+      ctx.fill();
+
+      // Border
+      ctx.strokeStyle = hexToRgba('#ffffff', 0.25);
+      ctx.lineWidth = p.size * 0.08;
+      ctx.beginPath();
+      ctx.rect(-w / 2 + p.size * 0.1, -h / 2 + p.size * 0.1, w - p.size * 0.2, h - p.size * 0.2);
+      ctx.stroke();
+
+      // Center decorative circle/oval
+      ctx.fillStyle = hexToRgba('#ffffff', 0.15);
+      ctx.beginPath();
+      ctx.ellipse(0, 0, w * 0.22, h * 0.35, 0, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Central Dollar Sign
+      ctx.fillStyle = '#ffffff';
+      ctx.font = `bold ${p.size * 0.8}px monospace`;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('$', 0, 0);
+
+      // Corner small decorations
+      ctx.fillStyle = hexToRgba('#ffffff', 0.35);
+      ctx.font = `${p.size * 0.4}px monospace`;
+      ctx.fillText('$', -w / 2 + p.size * 0.25, -h / 2 + p.size * 0.25);
+      ctx.fillText('$', w / 2 - p.size * 0.25, h / 2 - p.size * 0.25);
+
+      ctx.restore();
+      break;
+    }
+
     case 'circle':
     default: {
       const fadeAlpha = p.opacity * Math.sin(lifeRatio * Math.PI);

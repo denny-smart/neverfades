@@ -241,6 +241,30 @@ export const themes: FadeTheme[] = [
     },
     previewGradient: 'linear-gradient(135deg, #0a0800 0%, #1a1200 50%, #120e00 100%)',
   },
+  {
+    id: 'money-flow',
+    name: 'Green Wealth',
+    description: 'Dollar notes drift through the air',
+    background: '#041c0e',
+    palette: {
+      primary: '#22c55e',   // Green
+      secondary: '#15803d', // Dark Green
+      accent: '#eab308',    // Gold
+    },
+    themeEngine: {
+      particleDensity: 'medium',
+      motionBehavior: 'fall',
+      backgroundLayer: 'animated-gradient',
+      emotionalIntensity: 'medium',
+      particleShape: 'money',
+    },
+    pacing: {
+      introDelay: 1.2,
+      typingSpeed: 80,
+      pauseBetweenSteps: 1500,
+    },
+    previewGradient: 'linear-gradient(135deg, #041c0e 0%, #0d4a25 50%, #062211 100%)',
+  },
 ];
 
 export const getTheme = (id: string): FadeTheme =>

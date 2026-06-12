@@ -3,7 +3,7 @@ export interface ThemeEngineConfig {
   motionBehavior: 'drift' | 'pulse' | 'float' | 'fall';
   backgroundLayer: 'gradient' | 'noise' | 'animated-gradient';
   emotionalIntensity: 'soft' | 'medium' | 'deep';
-  particleShape: 'petal' | 'star' | 'balloon' | 'ember' | 'circle' | 'bear' | 'emoji';
+  particleShape: 'petal' | 'star' | 'balloon' | 'ember' | 'circle' | 'bear' | 'emoji' | 'money';
 }
 
 export interface FadeTheme {
