@@ -263,13 +263,13 @@ export const themes: FadeTheme[] = [
   },
   {
     id: 'money-flow',
-    name: 'Rose Gold Fortune',
-    description: 'Rose gold notes drift through the air',
-    background: '#1a0d10',
+    name: 'Platinum Rain',
+    description: 'Platinum notes cascade through midnight air',
+    background: '#07060f',
     palette: {
-      primary: '#e5a4a4',   // Rose Gold
-      secondary: '#8b5255', // Deep copper/rose-brown
-      accent: '#ffccd3',    // Champagne rose
+      primary: '#c9b8f0',   // Soft Platinum Violet
+      secondary: '#7c5cbf', // Deep Velvet Purple
+      accent: '#e8ddff',    // Ethereal Lavender
     },
     themeEngine: {
       particleDensity: 'medium',
@@ -283,7 +283,7 @@ export const themes: FadeTheme[] = [
       typingSpeed: 80,
       pauseBetweenSteps: 1500,
     },
-    previewGradient: 'linear-gradient(135deg, #1a0d10 0%, #462126 50%, #221013 100%)',
+    previewGradient: 'linear-gradient(135deg, #07060f 0%, #150d2e 50%, #0d0820 100%)',
     signOff: 'to your abundance & success,',
     brandFooter: 'limitlessabundance',
   },

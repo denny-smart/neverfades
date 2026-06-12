@@ -403,41 +403,65 @@ function drawParticle(
       const w = p.size * 2.4;
       const h = p.size * 1.3;
 
-      // Glow effect for money
-      ctx.shadowBlur = p.size * 0.8 * glowMult;
+      // Glow effect
+      ctx.shadowBlur = p.size * 1.0 * glowMult;
       ctx.shadowColor = p.color;
 
-      // Base note background
+      // Base note — filled with the theme's primary color for visual richness
       ctx.fillStyle = p.color;
       ctx.beginPath();
       ctx.rect(-w / 2, -h / 2, w, h);
       ctx.fill();
 
-      // Border
-      ctx.strokeStyle = hexToRgba('#ffffff', 0.25);
-      ctx.lineWidth = p.size * 0.08;
+      // Frosted glass / crystal inner layer (semi-transparent darker overlay)
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.28)';
       ctx.beginPath();
-      ctx.rect(-w / 2 + p.size * 0.1, -h / 2 + p.size * 0.1, w - p.size * 0.2, h - p.size * 0.2);
+      ctx.rect(-w / 2 + p.size * 0.12, -h / 2 + p.size * 0.12, w - p.size * 0.24, h - p.size * 0.24);
+      ctx.fill();
+
+      // Outer border
+      ctx.strokeStyle = hexToRgba('#ffffff', 0.3);
+      ctx.lineWidth = p.size * 0.07;
+      ctx.beginPath();
+      ctx.rect(-w / 2 + p.size * 0.06, -h / 2 + p.size * 0.06, w - p.size * 0.12, h - p.size * 0.12);
       ctx.stroke();
 
-      // Center decorative circle/oval
-      ctx.fillStyle = hexToRgba('#ffffff', 0.15);
+      // Inner border
+      ctx.strokeStyle = hexToRgba('#ffffff', 0.12);
+      ctx.lineWidth = p.size * 0.04;
+      ctx.beginPath();
+      ctx.rect(-w / 2 + p.size * 0.18, -h / 2 + p.size * 0.18, w - p.size * 0.36, h - p.size * 0.36);
+      ctx.stroke();
+
+      // Central oval highlight
+      ctx.fillStyle = hexToRgba('#ffffff', 0.1);
       ctx.beginPath();
       ctx.ellipse(0, 0, w * 0.22, h * 0.35, 0, 0, Math.PI * 2);
       ctx.fill();
 
+      // Diagonal shimmer line (premium feel)
+      const shimGrad = ctx.createLinearGradient(-w * 0.35, -h * 0.4, w * 0.35, h * 0.4);
+      shimGrad.addColorStop(0, 'rgba(255,255,255,0)');
+      shimGrad.addColorStop(0.45, 'rgba(255,255,255,0.18)');
+      shimGrad.addColorStop(0.55, 'rgba(255,255,255,0.18)');
+      shimGrad.addColorStop(1, 'rgba(255,255,255,0)');
+      ctx.fillStyle = shimGrad;
+      ctx.beginPath();
+      ctx.rect(-w / 2 + p.size * 0.12, -h / 2 + p.size * 0.12, w - p.size * 0.24, h - p.size * 0.24);
+      ctx.fill();
+
       // Central Dollar Sign
-      ctx.fillStyle = '#ffffff';
-      ctx.font = `bold ${p.size * 0.8}px monospace`;
+      ctx.fillStyle = 'rgba(255,255,255,0.9)';
+      ctx.font = `bold ${p.size * 0.82}px monospace`;
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
       ctx.fillText('$', 0, 0);
 
-      // Corner small decorations
-      ctx.fillStyle = hexToRgba('#ffffff', 0.35);
-      ctx.font = `${p.size * 0.4}px monospace`;
-      ctx.fillText('$', -w / 2 + p.size * 0.25, -h / 2 + p.size * 0.25);
-      ctx.fillText('$', w / 2 - p.size * 0.25, h / 2 - p.size * 0.25);
+      // Corner decorations
+      ctx.fillStyle = hexToRgba('#ffffff', 0.4);
+      ctx.font = `${p.size * 0.38}px monospace`;
+      ctx.fillText('$', -w / 2 + p.size * 0.28, -h / 2 + p.size * 0.28);
+      ctx.fillText('$', w / 2 - p.size * 0.28, h / 2 - p.size * 0.28);
 
       ctx.restore();
       break;

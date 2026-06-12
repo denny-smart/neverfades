@@ -28,6 +28,7 @@ function ThemeIcon({ id }: { id: string }) {
     'pink-petals':    '🌸',
     'white-petals':    '🤍',
     'golden-petals':  '💛',
+    'money-flow':     '💜',
   };
   return <span className="text-3xl select-none">{icons[id] ?? '🌹'}</span>;
 }

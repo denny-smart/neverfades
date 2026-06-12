@@ -251,28 +251,45 @@ function drawMiniParticle(
       const w = p.size * 2.4;
       const h = p.size * 1.3;
 
-      // Base note background
+      // Base note
       ctx.fillStyle = p.color;
       ctx.beginPath();
       ctx.rect(-w / 2, -h / 2, w, h);
       ctx.fill();
 
-      // Border
-      ctx.strokeStyle = 'rgba(255, 255, 255, 0.25)';
-      ctx.lineWidth = p.size * 0.08;
+      // Frosted inner fill
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.28)';
       ctx.beginPath();
-      ctx.rect(-w / 2 + p.size * 0.1, -h / 2 + p.size * 0.1, w - p.size * 0.2, h - p.size * 0.2);
-      ctx.stroke();
-
-      // Center decorative circle/oval
-      ctx.fillStyle = 'rgba(255, 255, 255, 0.15)';
-      ctx.beginPath();
-      ctx.ellipse(0, 0, w * 0.22, h * 0.35, 0, 0, Math.PI * 2);
+      ctx.rect(-w / 2 + p.size * 0.12, -h / 2 + p.size * 0.12, w - p.size * 0.24, h - p.size * 0.24);
       ctx.fill();
 
-      // Central Dollar Sign
-      ctx.fillStyle = '#ffffff';
-      ctx.font = `bold ${p.size * 0.8}px monospace`;
+      // Outer border
+      ctx.strokeStyle = 'rgba(255,255,255,0.3)';
+      ctx.lineWidth = p.size * 0.07;
+      ctx.beginPath();
+      ctx.rect(-w / 2 + p.size * 0.06, -h / 2 + p.size * 0.06, w - p.size * 0.12, h - p.size * 0.12);
+      ctx.stroke();
+
+      // Inner border
+      ctx.strokeStyle = 'rgba(255,255,255,0.12)';
+      ctx.lineWidth = p.size * 0.04;
+      ctx.beginPath();
+      ctx.rect(-w / 2 + p.size * 0.18, -h / 2 + p.size * 0.18, w - p.size * 0.36, h - p.size * 0.36);
+      ctx.stroke();
+
+      // Shimmer
+      const sGrad = ctx.createLinearGradient(-w * 0.35, -h * 0.4, w * 0.35, h * 0.4);
+      sGrad.addColorStop(0, 'rgba(255,255,255,0)');
+      sGrad.addColorStop(0.5, 'rgba(255,255,255,0.15)');
+      sGrad.addColorStop(1, 'rgba(255,255,255,0)');
+      ctx.fillStyle = sGrad;
+      ctx.beginPath();
+      ctx.rect(-w / 2 + p.size * 0.12, -h / 2 + p.size * 0.12, w - p.size * 0.24, h - p.size * 0.24);
+      ctx.fill();
+
+      // Dollar Sign
+      ctx.fillStyle = 'rgba(255,255,255,0.9)';
+      ctx.font = `bold ${p.size * 0.82}px monospace`;
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
       ctx.fillText('$', 0, 0);
