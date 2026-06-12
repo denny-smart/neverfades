@@ -23,7 +23,7 @@ const VIBE_MAP: Record<string, string> = {
   'pink-petals':    'Blush Whisper',
   'white-petals':   'Pure Serenity',
   'golden-petals':  'Gilded Dawn',
-  'money-flow':     'Platinum Rain',
+  'money-flow':     'Neon Wealth',
 };
 
 // Descriptive motion label shown on card
@@ -38,7 +38,7 @@ const MOTION_LABEL: Record<string, string> = {
   'pink-petals':    'blush flutter',
   'white-petals':   'ivory cascade',
   'golden-petals':  'golden flutter',
-  'money-flow':     'platinum cascade',
+  'money-flow':     'neon rain',
 };
 
 export default function ThemeSelector({ selected, onChange }: ThemeSelectorProps) {

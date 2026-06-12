@@ -248,48 +248,68 @@ function drawMiniParticle(
       ctx.translate(p.x, p.y);
       ctx.rotate(p.rotation);
 
-      const w = p.size * 2.4;
-      const h = p.size * 1.3;
+      const w = p.size * 2.6;
+      const h = p.size * 1.35;
+      const rx = p.size * 0.1;
+      const pad = p.size * 0.16;
 
-      // Base note
-      ctx.fillStyle = p.color;
+      const miniRoundedPath = () => {
+        ctx.beginPath();
+        ctx.moveTo(-w / 2 + rx, -h / 2);
+        ctx.lineTo( w / 2 - rx, -h / 2);
+        ctx.arcTo(  w / 2, -h / 2,  w / 2, -h / 2 + rx, rx);
+        ctx.lineTo( w / 2,  h / 2 - rx);
+        ctx.arcTo(  w / 2,  h / 2,  w / 2 - rx,  h / 2, rx);
+        ctx.lineTo(-w / 2 + rx,  h / 2);
+        ctx.arcTo(-w / 2,  h / 2, -w / 2,  h / 2 - rx, rx);
+        ctx.lineTo(-w / 2, -h / 2 + rx);
+        ctx.arcTo(-w / 2, -h / 2, -w / 2 + rx, -h / 2, rx);
+        ctx.closePath();
+      };
+
+      // Bill base gradient
+      const bg = ctx.createLinearGradient(-w / 2, -h / 2, w / 2, h / 2);
+      bg.addColorStop(0,    p.color + 'a0');
+      bg.addColorStop(0.45, p.color + 'e0');
+      bg.addColorStop(1,    p.color + '88');
+      ctx.fillStyle = bg;
+      miniRoundedPath();
+      ctx.fill();
+
+      // Dark inner field
+      ctx.fillStyle = 'rgba(0,0,0,0.32)';
+      ctx.beginPath();
+      ctx.rect(-w / 2 + pad, -h / 2 + pad, w - pad * 2, h - pad * 2);
+      ctx.fill();
+
+      // Outer border
+      ctx.strokeStyle = 'rgba(255,255,255,0.65)';
+      ctx.lineWidth   = p.size * 0.07;
+      miniRoundedPath();
+      ctx.stroke();
+
+      // Inner border
+      ctx.strokeStyle = 'rgba(255,255,255,0.22)';
+      ctx.lineWidth   = p.size * 0.035;
+      ctx.beginPath();
+      ctx.rect(-w / 2 + pad, -h / 2 + pad, w - pad * 2, h - pad * 2);
+      ctx.stroke();
+
+      // Shimmer
+      const sg = ctx.createLinearGradient(-w * 0.45, -h * 0.5, w * 0.45, h * 0.5);
+      sg.addColorStop(0,    'rgba(255,255,255,0)');
+      sg.addColorStop(0.42, 'rgba(255,255,255,0)');
+      sg.addColorStop(0.5,  'rgba(255,255,255,0.28)');
+      sg.addColorStop(0.58, 'rgba(255,255,255,0)');
+      sg.addColorStop(1,    'rgba(255,255,255,0)');
+      ctx.fillStyle = sg;
       ctx.beginPath();
       ctx.rect(-w / 2, -h / 2, w, h);
       ctx.fill();
 
-      // Frosted inner fill
-      ctx.fillStyle = 'rgba(0, 0, 0, 0.28)';
-      ctx.beginPath();
-      ctx.rect(-w / 2 + p.size * 0.12, -h / 2 + p.size * 0.12, w - p.size * 0.24, h - p.size * 0.24);
-      ctx.fill();
-
-      // Outer border
-      ctx.strokeStyle = 'rgba(255,255,255,0.3)';
-      ctx.lineWidth = p.size * 0.07;
-      ctx.beginPath();
-      ctx.rect(-w / 2 + p.size * 0.06, -h / 2 + p.size * 0.06, w - p.size * 0.12, h - p.size * 0.12);
-      ctx.stroke();
-
-      // Inner border
-      ctx.strokeStyle = 'rgba(255,255,255,0.12)';
-      ctx.lineWidth = p.size * 0.04;
-      ctx.beginPath();
-      ctx.rect(-w / 2 + p.size * 0.18, -h / 2 + p.size * 0.18, w - p.size * 0.36, h - p.size * 0.36);
-      ctx.stroke();
-
-      // Shimmer
-      const sGrad = ctx.createLinearGradient(-w * 0.35, -h * 0.4, w * 0.35, h * 0.4);
-      sGrad.addColorStop(0, 'rgba(255,255,255,0)');
-      sGrad.addColorStop(0.5, 'rgba(255,255,255,0.15)');
-      sGrad.addColorStop(1, 'rgba(255,255,255,0)');
-      ctx.fillStyle = sGrad;
-      ctx.beginPath();
-      ctx.rect(-w / 2 + p.size * 0.12, -h / 2 + p.size * 0.12, w - p.size * 0.24, h - p.size * 0.24);
-      ctx.fill();
-
       // Dollar Sign
-      ctx.fillStyle = 'rgba(255,255,255,0.9)';
-      ctx.font = `bold ${p.size * 0.82}px monospace`;
+      ctx.fillStyle = 'rgba(255,255,255,0.97)';
+      ctx.font = `900 ${p.size}px monospace`;
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
       ctx.fillText('$', 0, 0);

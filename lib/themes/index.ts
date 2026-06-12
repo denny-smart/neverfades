@@ -263,19 +263,19 @@ export const themes: FadeTheme[] = [
   },
   {
     id: 'money-flow',
-    name: 'Platinum Rain',
-    description: 'Platinum notes cascade through midnight air',
-    background: '#07060f',
+    name: 'Neon Wealth',
+    description: 'Holographic bills rain through a neon night',
+    background: '#020b10',
     palette: {
-      primary: '#c9b8f0',   // Soft Platinum Violet
-      secondary: '#7c5cbf', // Deep Velvet Purple
-      accent: '#e8ddff',    // Ethereal Lavender
+      primary: '#00e5ff',   // Electric Cyan
+      secondary: '#0077b6', // Ocean Blue
+      accent: '#90f0fe',    // Ice Blue
     },
     themeEngine: {
-      particleDensity: 'medium',
+      particleDensity: 'high',
       motionBehavior: 'fall',
       backgroundLayer: 'animated-gradient',
-      emotionalIntensity: 'medium',
+      emotionalIntensity: 'deep',
       particleShape: 'money',
     },
     pacing: {
@@ -283,7 +283,7 @@ export const themes: FadeTheme[] = [
       typingSpeed: 80,
       pauseBetweenSteps: 1500,
     },
-    previewGradient: 'linear-gradient(135deg, #07060f 0%, #150d2e 50%, #0d0820 100%)',
+    previewGradient: 'linear-gradient(135deg, #020b10 0%, #061e2e 50%, #030e1a 100%)',
     signOff: 'to your abundance & success,',
     brandFooter: 'limitlessabundance',
   },

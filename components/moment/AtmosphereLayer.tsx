@@ -400,68 +400,105 @@ function drawParticle(
       ctx.rotate(p.rotation ?? 0);
       ctx.globalAlpha = Math.max(0, fadeAlpha);
 
-      const w = p.size * 2.4;
-      const h = p.size * 1.3;
+      const w = p.size * 2.6;
+      const h = p.size * 1.35;
+      const rx = p.size * 0.1;
+      const pad = p.size * 0.16;
 
-      // Glow effect
-      ctx.shadowBlur = p.size * 1.0 * glowMult;
+      // ── Clipping path (rounded rect) ──────────────────────────
+      const roundedPath = () => {
+        ctx.beginPath();
+        ctx.moveTo(-w / 2 + rx, -h / 2);
+        ctx.lineTo( w / 2 - rx, -h / 2);
+        ctx.arcTo(  w / 2, -h / 2,  w / 2, -h / 2 + rx, rx);
+        ctx.lineTo( w / 2,  h / 2 - rx);
+        ctx.arcTo(  w / 2,  h / 2,  w / 2 - rx,  h / 2, rx);
+        ctx.lineTo(-w / 2 + rx,  h / 2);
+        ctx.arcTo(-w / 2,  h / 2, -w / 2,  h / 2 - rx, rx);
+        ctx.lineTo(-w / 2, -h / 2 + rx);
+        ctx.arcTo(-w / 2, -h / 2, -w / 2 + rx, -h / 2, rx);
+        ctx.closePath();
+      };
+
+      // ── Outer neon glow ───────────────────────────────────────
+      ctx.shadowBlur  = p.size * 2.5 * glowMult;
       ctx.shadowColor = p.color;
 
-      // Base note — filled with the theme's primary color for visual richness
-      ctx.fillStyle = p.color;
+      // ── Bill base gradient ────────────────────────────────────
+      const baseGrad = ctx.createLinearGradient(-w / 2, -h / 2, w / 2, h / 2);
+      baseGrad.addColorStop(0,    hexToRgba(p.color, 0.6));
+      baseGrad.addColorStop(0.45, hexToRgba(p.color, 0.88));
+      baseGrad.addColorStop(1,    hexToRgba(p.color, 0.5));
+      ctx.fillStyle = baseGrad;
+      roundedPath();
+      ctx.fill();
+
+      ctx.shadowBlur = 0;
+
+      // ── Dark inner field ──────────────────────────────────────
+      ctx.fillStyle = 'rgba(0,0,0,0.32)';
+      ctx.beginPath();
+      ctx.rect(-w / 2 + pad, -h / 2 + pad, w - pad * 2, h - pad * 2);
+      ctx.fill();
+
+      // ── Outer border ──────────────────────────────────────────
+      ctx.strokeStyle = hexToRgba('#ffffff', 0.65);
+      ctx.lineWidth   = p.size * 0.07;
+      roundedPath();
+      ctx.stroke();
+
+      // ── Inner border ──────────────────────────────────────────
+      ctx.strokeStyle = hexToRgba('#ffffff', 0.22);
+      ctx.lineWidth   = p.size * 0.035;
+      ctx.beginPath();
+      ctx.rect(-w / 2 + pad, -h / 2 + pad, w - pad * 2, h - pad * 2);
+      ctx.stroke();
+
+      // ── Horizontal rule lines (banknote engrave feel) ─────────
+      ctx.strokeStyle = hexToRgba('#ffffff', 0.12);
+      ctx.lineWidth   = p.size * 0.025;
+      const ruleX1 = -w / 2 + pad * 1.8;
+      const ruleX2 =  w / 2 - pad * 1.8;
+      ctx.beginPath(); ctx.moveTo(ruleX1, -h * 0.2); ctx.lineTo(ruleX2, -h * 0.2); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(ruleX1,  h * 0.2); ctx.lineTo(ruleX2,  h * 0.2); ctx.stroke();
+
+      // ── Radial centre glow ────────────────────────────────────
+      const cg = ctx.createRadialGradient(0, 0, 0, 0, 0, p.size * 0.85);
+      cg.addColorStop(0, hexToRgba('#ffffff', 0.25));
+      cg.addColorStop(1, 'rgba(0,0,0,0)');
+      ctx.fillStyle = cg;
+      ctx.beginPath();
+      ctx.ellipse(0, 0, w * 0.28, h * 0.42, 0, 0, Math.PI * 2);
+      ctx.fill();
+
+      // ── Diagonal holographic shimmer ──────────────────────────
+      const sg = ctx.createLinearGradient(-w * 0.45, -h * 0.5, w * 0.45, h * 0.5);
+      sg.addColorStop(0,    'rgba(255,255,255,0)');
+      sg.addColorStop(0.35, 'rgba(255,255,255,0)');
+      sg.addColorStop(0.47, 'rgba(255,255,255,0.3)');
+      sg.addColorStop(0.53, 'rgba(255,255,255,0.3)');
+      sg.addColorStop(0.65, 'rgba(255,255,255,0)');
+      sg.addColorStop(1,    'rgba(255,255,255,0)');
+      ctx.fillStyle = sg;
       ctx.beginPath();
       ctx.rect(-w / 2, -h / 2, w, h);
       ctx.fill();
 
-      // Frosted glass / crystal inner layer (semi-transparent darker overlay)
-      ctx.fillStyle = 'rgba(0, 0, 0, 0.28)';
-      ctx.beginPath();
-      ctx.rect(-w / 2 + p.size * 0.12, -h / 2 + p.size * 0.12, w - p.size * 0.24, h - p.size * 0.24);
-      ctx.fill();
-
-      // Outer border
-      ctx.strokeStyle = hexToRgba('#ffffff', 0.3);
-      ctx.lineWidth = p.size * 0.07;
-      ctx.beginPath();
-      ctx.rect(-w / 2 + p.size * 0.06, -h / 2 + p.size * 0.06, w - p.size * 0.12, h - p.size * 0.12);
-      ctx.stroke();
-
-      // Inner border
-      ctx.strokeStyle = hexToRgba('#ffffff', 0.12);
-      ctx.lineWidth = p.size * 0.04;
-      ctx.beginPath();
-      ctx.rect(-w / 2 + p.size * 0.18, -h / 2 + p.size * 0.18, w - p.size * 0.36, h - p.size * 0.36);
-      ctx.stroke();
-
-      // Central oval highlight
-      ctx.fillStyle = hexToRgba('#ffffff', 0.1);
-      ctx.beginPath();
-      ctx.ellipse(0, 0, w * 0.22, h * 0.35, 0, 0, Math.PI * 2);
-      ctx.fill();
-
-      // Diagonal shimmer line (premium feel)
-      const shimGrad = ctx.createLinearGradient(-w * 0.35, -h * 0.4, w * 0.35, h * 0.4);
-      shimGrad.addColorStop(0, 'rgba(255,255,255,0)');
-      shimGrad.addColorStop(0.45, 'rgba(255,255,255,0.18)');
-      shimGrad.addColorStop(0.55, 'rgba(255,255,255,0.18)');
-      shimGrad.addColorStop(1, 'rgba(255,255,255,0)');
-      ctx.fillStyle = shimGrad;
-      ctx.beginPath();
-      ctx.rect(-w / 2 + p.size * 0.12, -h / 2 + p.size * 0.12, w - p.size * 0.24, h - p.size * 0.24);
-      ctx.fill();
-
-      // Central Dollar Sign
-      ctx.fillStyle = 'rgba(255,255,255,0.9)';
-      ctx.font = `bold ${p.size * 0.82}px monospace`;
-      ctx.textAlign = 'center';
+      // ── Central $ with inner glow ─────────────────────────────
+      ctx.shadowBlur  = p.size * 1.8;
+      ctx.shadowColor = '#ffffff';
+      ctx.fillStyle   = 'rgba(255,255,255,0.97)';
+      ctx.font        = `900 ${p.size}px monospace`;
+      ctx.textAlign   = 'center';
       ctx.textBaseline = 'middle';
       ctx.fillText('$', 0, 0);
+      ctx.shadowBlur = 0;
 
-      // Corner decorations
-      ctx.fillStyle = hexToRgba('#ffffff', 0.4);
-      ctx.font = `${p.size * 0.38}px monospace`;
-      ctx.fillText('$', -w / 2 + p.size * 0.28, -h / 2 + p.size * 0.28);
-      ctx.fillText('$', w / 2 - p.size * 0.28, h / 2 - p.size * 0.28);
+      // ── Corner $ marks ────────────────────────────────────────
+      ctx.fillStyle = hexToRgba('#ffffff', 0.5);
+      ctx.font      = `bold ${p.size * 0.42}px monospace`;
+      ctx.fillText('$', -w / 2 + pad * 1.3, -h / 2 + pad * 1.3);
+      ctx.fillText('$',  w / 2 - pad * 1.3,  h / 2 - pad * 1.3);
 
       ctx.restore();
       break;
