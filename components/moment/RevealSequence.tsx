@@ -30,7 +30,6 @@ export default function RevealSequence({ moment }: RevealSequenceProps) {
   const signatureEmoji = getMessageEmoji(moment.message, moment.sender_name);
 
   const [step, setStep] = useState(STEP_SILENCE);
-  const [atmosphereActive, setAtmosphereActive] = useState(false);
 
   // Split message into dynamic lines based on sentence boundaries
   const lines = useMemo(() => {
@@ -79,17 +78,39 @@ export default function RevealSequence({ moment }: RevealSequenceProps) {
     return () => clearTimeout(t);
   }, [step, lines]);
 
-  // Trigger ambient background elements
-  useEffect(() => {
-    if (step !== STEP_ATMOSPHERE) return;
-    const t = setTimeout(() => setAtmosphereActive(true), 350);
-    return () => clearTimeout(t);
-  }, [step]);
-
   const fadeIn = {
     hidden:  { opacity: 0 },
     visible: { opacity: 1, transition: { duration: 0.7, ease: [0.16, 1, 0.3, 1] as const } },
     exit:    { opacity: 0, transition: { duration: 0.4 } },
+  };
+
+  const introVariants = {
+    hidden: {
+      opacity: 0,
+      scale: 0.96,
+      filter: 'blur(10px)',
+      letterSpacing: '0.18em',
+    },
+    visible: {
+      opacity: 0.85,
+      scale: 1,
+      filter: 'blur(0px)',
+      letterSpacing: '0.3em',
+      transition: {
+        duration: 1.4,
+        ease: [0.16, 1, 0.3, 1] as const,
+      }
+    },
+    exit: {
+      opacity: 0,
+      scale: 1.04,
+      filter: 'blur(8px)',
+      letterSpacing: '0.36em',
+      transition: {
+        duration: 0.7,
+        ease: [0.16, 1, 0.3, 1] as const,
+      }
+    }
   };
 
   const fadeUp = {
@@ -153,11 +174,12 @@ export default function RevealSequence({ moment }: RevealSequenceProps) {
 
       {/* Particle Atmosphere canvas */}
       <AnimatePresence>
-        {atmosphereActive && (
+        {step > STEP_SILENCE && (
           <motion.div
             initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
+            animate={{ opacity: step === STEP_ATMOSPHERE ? 1 : 0.28 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 2.0, ease: [0.16, 1, 0.3, 1] }}
             className="absolute inset-0 z-0"
           >
             <AtmosphereLayer
@@ -183,15 +205,22 @@ export default function RevealSequence({ moment }: RevealSequenceProps) {
       </AnimatePresence>
 
       {/* Lifespan Indicator */}
-      {step > STEP_SILENCE && (
-        <div className="absolute top-8 left-1/2 -translate-x-1/2 z-10">
-          <LifespanIndicator
-            viewCount={moment.view_count}
-            maxViews={moment.max_views}
-            accentColor={theme.palette.primary}
-          />
-        </div>
-      )}
+      <AnimatePresence>
+        {step > STEP_SILENCE && (
+          <motion.div
+            initial={{ opacity: 0, y: -25 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 1.0, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
+            className="absolute top-8 left-1/2 -translate-x-1/2 z-10"
+          >
+            <LifespanIndicator
+              viewCount={moment.view_count}
+              maxViews={moment.max_views}
+              accentColor={theme.palette.primary}
+            />
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Central Content */}
       <div className="relative z-10 max-w-xl w-full text-center flex flex-col items-center justify-center">
@@ -201,11 +230,11 @@ export default function RevealSequence({ moment }: RevealSequenceProps) {
           {step >= STEP_INTRO && step <= STEP_PAUSE && (
             <motion.p
               key="intro"
-              variants={fadeIn}
+              variants={introVariants}
               initial="hidden"
               animate="visible"
               exit="exit"
-              className="font-body text-xs tracking-[0.3em] uppercase text-ash-200 mb-8"
+              className="font-body text-xs uppercase text-ash-200 mb-8"
             >
               A moment created for you is unfolding…
             </motion.p>

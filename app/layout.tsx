@@ -1,19 +1,19 @@
 import type { Metadata } from 'next';
 import { ViewTransition } from 'react';
-import { Cormorant_Garamond, Inter } from 'next/font/google';
+import { Playfair_Display, Outfit } from 'next/font/google';
 import './globals.css';
 
-const cormorant = Cormorant_Garamond({
+const playfair = Playfair_Display({
   subsets: ['latin'],
-  weight: ['300', '400', '500', '600'],
-  variable: '--font-cormorant',
+  weight: ['400', '500', '600', '700'],
+  variable: '--font-playfair',
   display: 'swap',
 });
 
-const inter = Inter({
+const outfit = Outfit({
   subsets: ['latin'],
-  weight: ['300', '400', '500'],
-  variable: '--font-inter',
+  weight: ['300', '400', '500', '600'],
+  variable: '--font-outfit',
   display: 'swap',
 });
 
@@ -33,7 +33,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className={`${cormorant.variable} ${inter.variable}`}>
+    <html lang="en" className={`${playfair.variable} ${outfit.variable}`}>
       <body className="bg-void text-white antialiased">
         <ViewTransition
           enter={{
