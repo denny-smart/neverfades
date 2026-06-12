@@ -225,7 +225,7 @@ export default function FadedScreen() {
           transition={{ duration: 1.2, delay: 1.3, ease: [0.16, 1, 0.3, 1] }}
           className="font-display text-4xl sm:text-5xl font-light text-white mb-3 leading-tight"
         >
-          Someone built this for you.
+          This was made with one person in mind.
         </motion.h1>
 
         {/* Italic accent — emotional exhale after the headline */}
@@ -235,7 +235,7 @@ export default function FadedScreen() {
           transition={{ duration: 1.0, delay: 1.7, ease: [0.16, 1, 0.3, 1] }}
           className="font-display text-2xl sm:text-3xl italic text-gradient-crimson mb-8 leading-snug"
         >
-          That is a rare thing.
+          You were that person.
         </motion.p>
 
         {/* Sub-copy */}
@@ -245,7 +245,7 @@ export default function FadedScreen() {
           transition={{ duration: 1.0, delay: 2.1, ease: [0.16, 1, 0.3, 1] }}
           className="font-body text-[14px] text-white/50 leading-loose mb-10 max-w-[240px] mx-auto"
         >
-          The page has done its job. What it carried lives with you now, safe, private, and theirs to give only once.
+          The page has cleared. The thought behind it has not. It is still here, held quietly between you and the person who made it.
         </motion.p>
 
         {/* Divider */}
@@ -265,7 +265,7 @@ export default function FadedScreen() {
           className="flex flex-col items-center gap-4 w-full"
         >
           <p className="font-body text-[9px] tracking-[0.35em] uppercase text-white/35">
-            They gave you theirs
+            Now it lives with you
           </p>
           <motion.div
             animate={{
@@ -289,7 +289,7 @@ export default function FadedScreen() {
                 style={{ background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.16), transparent)' }}
                 aria-hidden="true"
               />
-              <span className="relative z-10">Build one for someone else</span>
+              <span className="relative z-10">Give someone that feeling</span>
             </Link>
           </motion.div>
         </motion.div>
