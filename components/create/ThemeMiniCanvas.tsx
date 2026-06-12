@@ -22,6 +22,13 @@ interface MiniParticle {
   rotationSpeed: number;
   phase: number;
   color: string;
+  pitchPhase?: number;
+  pitchSpeed?: number;
+  rollPhase?: number;
+  rollSpeed?: number;
+  swayPhase?: number;
+  swayFreq?: number;
+  swayAmp?: number;
 }
 
 const MAX_PARTICLES = 9;
@@ -45,6 +52,7 @@ function createMiniParticle(
       const particleMaxLife = shape === 'money' ? (h + 30) / vy : (180 + Math.random() * 120);
       const startY = Math.random() * h;
       const startLife = shape === 'money' ? ((startY + 15) / (h + 30)) * particleMaxLife : life;
+      const isMoney = shape === 'money';
 
       return {
         x: Math.random() * w,
@@ -59,6 +67,13 @@ function createMiniParticle(
         rotationSpeed: (Math.random() - 0.5) * 0.03,
         phase: Math.random() * Math.PI * 2,
         color,
+        pitchPhase: isMoney ? Math.random() * Math.PI * 2 : undefined,
+        pitchSpeed: isMoney ? Math.random() * 0.04 + 0.02 : undefined,
+        rollPhase: isMoney ? Math.random() * Math.PI * 2 : undefined,
+        rollSpeed: isMoney ? Math.random() * 0.03 + 0.015 : undefined,
+        swayPhase: isMoney ? Math.random() * Math.PI * 2 : undefined,
+        swayFreq: isMoney ? Math.random() * 0.015 + 0.01 : undefined,
+        swayAmp: isMoney ? Math.random() * 0.8 + 0.5 : undefined,
       };
     }
     case 'drift':
@@ -248,6 +263,21 @@ function drawMiniParticle(
       ctx.translate(p.x, p.y);
       ctx.rotate(p.rotation);
 
+      // Simulating 3D flipping (pitch and roll)
+      let flipFactor = 1;
+      if (p.pitchPhase !== undefined && p.pitchSpeed !== undefined) {
+        const pitch = p.life * p.pitchSpeed + p.pitchPhase;
+        const scaleY = Math.sin(pitch);
+        
+        const roll = p.life * (p.rollSpeed ?? 0.02) + (p.rollPhase ?? 0);
+        const scaleX = Math.cos(roll);
+        
+        ctx.scale(scaleX, scaleY);
+        flipFactor = Math.abs(scaleY);
+      }
+
+      ctx.globalAlpha = Math.max(0, alpha * (0.2 + 0.8 * flipFactor));
+
       const w = p.size * 2.6;
       const h = p.size * 1.35;
       const rx = p.size * 0.1;
@@ -296,11 +326,12 @@ function drawMiniParticle(
       ctx.stroke();
 
       // Shimmer
+      const shimmerOffset = Math.sin(p.life * 0.03 + (p.pitchPhase ?? 0)) * 0.5;
       const sg = ctx.createLinearGradient(-w * 0.45, -h * 0.5, w * 0.45, h * 0.5);
       sg.addColorStop(0,    'rgba(255,255,255,0)');
-      sg.addColorStop(0.42, 'rgba(255,255,255,0)');
-      sg.addColorStop(0.5,  'rgba(255,255,255,0.28)');
-      sg.addColorStop(0.58, 'rgba(255,255,255,0)');
+      sg.addColorStop(Math.max(0, 0.2 + shimmerOffset), 'rgba(255,255,255,0)');
+      sg.addColorStop(Math.max(0, Math.min(1, 0.5 + shimmerOffset)), `rgba(255,255,255,${0.25 + 0.15 * flipFactor})`);
+      sg.addColorStop(Math.min(1, 0.8 + shimmerOffset), 'rgba(255,255,255,0)');
       sg.addColorStop(1,    'rgba(255,255,255,0)');
       ctx.fillStyle = sg;
       ctx.beginPath();
@@ -375,9 +406,15 @@ export default function ThemeMiniCanvas({
 
       particlesRef.current = particlesRef.current.filter((p) => {
         p.life++;
-        p.x += p.vx + Math.sin(p.life * 0.025 + p.phase) * 0.25;
-        p.y += p.vy;
-        p.rotation += p.rotationSpeed;
+        if (particleShape === 'money' && p.swayPhase !== undefined && p.swayFreq !== undefined && p.swayAmp !== undefined) {
+          p.x += p.vx + Math.sin(p.life * p.swayFreq + p.swayPhase) * p.swayAmp;
+          p.y += p.vy * (1 + 0.15 * Math.sin(p.life * p.swayFreq * 2 + p.swayPhase));
+          p.rotation += p.rotationSpeed * 0.4;
+        } else {
+          p.x += p.vx + Math.sin(p.life * 0.025 + p.phase) * 0.25;
+          p.y += p.vy;
+          p.rotation += p.rotationSpeed;
+        }
 
         drawMiniParticle(ctx, p, particleShape);
 

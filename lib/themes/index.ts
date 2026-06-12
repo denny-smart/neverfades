@@ -265,11 +265,11 @@ export const themes: FadeTheme[] = [
     id: 'money-flow',
     name: 'Neon Wealth',
     description: 'Holographic bills rain through a neon night',
-    background: '#020b10',
+    background: '#030206',
     palette: {
       primary: '#00e5ff',   // Electric Cyan
-      secondary: '#0077b6', // Ocean Blue
-      accent: '#90f0fe',    // Ice Blue
+      secondary: '#00ffcc', // Neon Mint
+      accent: '#ffd700',    // Brushed Gold
     },
     themeEngine: {
       particleDensity: 'high',
@@ -283,7 +283,7 @@ export const themes: FadeTheme[] = [
       typingSpeed: 80,
       pauseBetweenSteps: 1500,
     },
-    previewGradient: 'linear-gradient(135deg, #020b10 0%, #061e2e 50%, #030e1a 100%)',
+    previewGradient: 'linear-gradient(135deg, #030206 0%, #0b0f19 50%, #05040a 100%)',
     signOff: 'to your abundance & success,',
     brandFooter: 'limitlessabundance',
   },

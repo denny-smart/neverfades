@@ -27,6 +27,11 @@ interface Particle {
   windAmp?: number;
   swayFreq?: number;
   swayAmp?: number;
+  pitchPhase?: number;
+  pitchSpeed?: number;
+  rollPhase?: number;
+  rollSpeed?: number;
+  swayPhase?: number;
 }
 
 const DENSITY_MAP = { low: 20, medium: 45, high: 75 };
@@ -65,6 +70,8 @@ function createParticle(
         ? (canvas.height + 70) / vy
         : maxLife;
 
+      const isMoney = config.particleShape === 'money';
+
       return {
         x: Math.random() * canvas.width,
         y: -30,
@@ -81,6 +88,13 @@ function createParticle(
         windPhase: Math.random() * Math.PI * 2,
         windFreq: Math.random() * 0.015 + 0.005,
         windAmp: Math.random() * 1.8 + 0.6,
+        pitchPhase: isMoney ? Math.random() * Math.PI * 2 : undefined,
+        pitchSpeed: isMoney ? Math.random() * 0.03 + 0.015 : undefined,
+        rollPhase: isMoney ? Math.random() * Math.PI * 2 : undefined,
+        rollSpeed: isMoney ? Math.random() * 0.02 + 0.01 : undefined,
+        swayPhase: isMoney ? Math.random() * Math.PI * 2 : undefined,
+        swayFreq: isMoney ? Math.random() * 0.01 + 0.005 : undefined,
+        swayAmp: isMoney ? Math.random() * 1.5 + 1.0 : undefined,
       };
     }
 
@@ -398,7 +412,22 @@ function drawParticle(
       ctx.save();
       ctx.translate(p.x, p.y);
       ctx.rotate(p.rotation ?? 0);
-      ctx.globalAlpha = Math.max(0, fadeAlpha);
+
+      // Simulating 3D flipping (pitch and roll)
+      let flipFactor = 1;
+      if (p.pitchPhase !== undefined && p.pitchSpeed !== undefined) {
+        const pitch = p.life * p.pitchSpeed + p.pitchPhase;
+        const scaleY = Math.sin(pitch);
+        
+        const roll = p.life * (p.rollSpeed ?? 0.02) + (p.rollPhase ?? 0);
+        const scaleX = Math.cos(roll);
+        
+        ctx.scale(scaleX, scaleY);
+        flipFactor = Math.abs(scaleY);
+      }
+
+      const displayAlpha = fadeAlpha * (0.2 + 0.8 * flipFactor);
+      ctx.globalAlpha = Math.max(0, displayAlpha);
 
       const w = p.size * 2.6;
       const h = p.size * 1.35;
@@ -421,7 +450,7 @@ function drawParticle(
       };
 
       // ── Outer neon glow ───────────────────────────────────────
-      ctx.shadowBlur  = p.size * 2.5 * glowMult;
+      ctx.shadowBlur  = p.size * (1.5 + 1.5 * flipFactor) * glowMult;
       ctx.shadowColor = p.color;
 
       // ── Bill base gradient ────────────────────────────────────
@@ -472,12 +501,12 @@ function drawParticle(
       ctx.fill();
 
       // ── Diagonal holographic shimmer ──────────────────────────
+      const shimmerOffset = Math.sin(p.life * 0.03 + (p.pitchPhase ?? 0)) * 0.5;
       const sg = ctx.createLinearGradient(-w * 0.45, -h * 0.5, w * 0.45, h * 0.5);
       sg.addColorStop(0,    'rgba(255,255,255,0)');
-      sg.addColorStop(0.35, 'rgba(255,255,255,0)');
-      sg.addColorStop(0.47, 'rgba(255,255,255,0.3)');
-      sg.addColorStop(0.53, 'rgba(255,255,255,0.3)');
-      sg.addColorStop(0.65, 'rgba(255,255,255,0)');
+      sg.addColorStop(Math.max(0, 0.2 + shimmerOffset), 'rgba(255,255,255,0)');
+      sg.addColorStop(Math.max(0, Math.min(1, 0.5 + shimmerOffset)), `rgba(255,255,255,${0.25 + 0.15 * flipFactor})`);
+      sg.addColorStop(Math.min(1, 0.8 + shimmerOffset), 'rgba(255,255,255,0)');
       sg.addColorStop(1,    'rgba(255,255,255,0)');
       ctx.fillStyle = sg;
       ctx.beginPath();
@@ -581,23 +610,34 @@ export default function AtmosphereLayer({
         
         // Update horizontal position using organic wind sines or spring-sways
         if (themeEngine.motionBehavior === 'fall' && p.windPhase !== undefined && p.windFreq !== undefined && p.windAmp !== undefined) {
-          // Fall wind sway (rose petals)
-          p.x += p.vx + Math.sin(p.life * p.windFreq + p.windPhase) * p.windAmp * 0.15;
+          if (themeEngine.particleShape === 'money' && p.swayPhase !== undefined && p.swayFreq !== undefined && p.swayAmp !== undefined) {
+            // Elegant aerodynamic leaf-fall glide for banknotes
+            p.x += p.vx + Math.sin(p.life * p.swayFreq + p.swayPhase) * p.swayAmp * p.depth * 0.7;
+            p.y += p.vy * (1 + 0.15 * Math.sin(p.life * p.swayFreq * 2 + p.swayPhase));
+          } else {
+            p.x += p.vx + Math.sin(p.life * p.windFreq + p.windPhase) * p.windAmp * 0.15;
+            p.y += p.vy;
+          }
         } else if (themeEngine.motionBehavior === 'float' && p.swayFreq !== undefined && p.swayAmp !== undefined) {
           // Floating spring sway (balloons)
           p.x += p.vx + Math.sin(p.life * p.swayFreq) * p.swayAmp * 0.12;
+          p.y += p.vy;
           p.rotation = Math.sin(p.life * p.swayFreq * 0.7) * 0.12; // tilt oscillation
         } else if (themeEngine.motionBehavior === 'drift' && p.windPhase !== undefined && p.windFreq !== undefined && p.windAmp !== undefined) {
           // Subtle drifting wave
           p.x += p.vx + Math.cos(p.life * p.windFreq + p.windPhase) * p.windAmp * 0.08;
+          p.y += p.vy;
         } else {
           p.x += p.vx;
+          p.y += p.vy;
         }
 
-        p.y += p.vy;
-
         if (p.rotation !== undefined && p.rotationSpeed !== undefined && themeEngine.motionBehavior !== 'float') {
-          p.rotation += p.rotationSpeed;
+          if (themeEngine.particleShape === 'money') {
+            p.rotation += p.rotationSpeed * 0.4;
+          } else {
+            p.rotation += p.rotationSpeed;
+          }
         }
 
         drawParticle(ctx, p, themeEngine, glowMult);
