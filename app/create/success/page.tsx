@@ -40,8 +40,8 @@ function SuccessContent() {
 
   const momentUrl =
     typeof window !== 'undefined'
-      ? `${window.location.origin}/moment/${slug}`
-      : `/moment/${slug}`;
+      ? `${window.location.origin}/${slug}`
+      : `/${slug}`;
 
   const [stats,  setStats]  = useState<StatsState | null>(null);
   const [copied, setCopied] = useState(false);
