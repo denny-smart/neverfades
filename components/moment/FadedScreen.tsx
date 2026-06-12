@@ -225,9 +225,11 @@ export default function FadedScreen() {
           transition={{ duration: 1.2, delay: 1.3, ease: [0.16, 1, 0.3, 1] }}
           className="font-display text-4xl sm:text-5xl font-light text-white mb-5 leading-tight"
         >
-          This moment has faded
+          Someone thought of you
           <br />
-          <span className="text-gradient-crimson italic">from the surface.</span>
+          <span className="text-gradient-crimson italic">enough to build this.</span>
+          <br />
+          <span className="text-white/70 text-3xl sm:text-4xl">That part does not expire.</span>
         </motion.h1>
 
         {/* Sub-copy */}
@@ -237,8 +239,8 @@ export default function FadedScreen() {
           transition={{ duration: 1.0, delay: 1.85, ease: [0.16, 1, 0.3, 1] }}
           className="font-body text-sm text-white/55 leading-relaxed mb-10 max-w-[260px] mx-auto"
         >
-          But it still exists between you both — in the place where things
-          are truly felt.
+          The page has cleared. What it carried has not. It lives now
+          between you and the person who made it, safe and entirely private.
         </motion.p>
 
         {/* Divider */}

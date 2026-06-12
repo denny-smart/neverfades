@@ -263,13 +263,13 @@ export const themes: FadeTheme[] = [
   },
   {
     id: 'money-flow',
-    name: 'Green Wealth',
-    description: 'Dollar notes drift through the air',
-    background: '#041c0e',
+    name: 'Rose Gold Fortune',
+    description: 'Rose gold notes drift through the air',
+    background: '#1a0d10',
     palette: {
-      primary: '#22c55e',   // Green
-      secondary: '#15803d', // Dark Green
-      accent: '#eab308',    // Gold
+      primary: '#e5a4a4',   // Rose Gold
+      secondary: '#8b5255', // Deep copper/rose-brown
+      accent: '#ffccd3',    // Champagne rose
     },
     themeEngine: {
       particleDensity: 'medium',
@@ -283,7 +283,7 @@ export const themes: FadeTheme[] = [
       typingSpeed: 80,
       pauseBetweenSteps: 1500,
     },
-    previewGradient: 'linear-gradient(135deg, #041c0e 0%, #0d4a25 50%, #062211 100%)',
+    previewGradient: 'linear-gradient(135deg, #1a0d10 0%, #462126 50%, #221013 100%)',
     signOff: 'to your abundance & success,',
     brandFooter: 'limitlessabundance',
   },
