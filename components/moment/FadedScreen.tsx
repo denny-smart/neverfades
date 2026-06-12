@@ -77,10 +77,16 @@ function AshCanvas() {
         ctx.translate(p.x, p.y);
         ctx.rotate(p.rotation);
         ctx.globalAlpha = Math.max(0, alpha);
+        ctx.beginPath();
+        ctx.moveTo(0, -p.size * 1.25);
+        ctx.lineTo(p.size * 0.75, 0);
+        ctx.lineTo(0, p.size * 1.25);
+        ctx.lineTo(-p.size * 0.75, 0);
+        ctx.closePath();
         ctx.fillStyle   = '#c41230';
-
-        // Soft rectangular ash flake
-        ctx.fillRect(-p.size / 2, -p.size * 0.35, p.size, p.size * 0.7);
+        ctx.shadowBlur  = p.size * 1.8;
+        ctx.shadowColor = '#c41230';
+        ctx.fill();
         ctx.restore();
 
         return p.life < p.maxLife && p.y < canvas.height + 20;
@@ -229,7 +235,7 @@ export default function FadedScreen() {
           initial={{ opacity: 0, y: 14 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 1.0, delay: 1.85, ease: [0.16, 1, 0.3, 1] }}
-          className="font-body text-sm text-white/35 leading-relaxed mb-10 max-w-[260px] mx-auto"
+          className="font-body text-sm text-white/55 leading-relaxed mb-10 max-w-[260px] mx-auto"
         >
           But it still exists between you both — in the place where things
           are truly felt.
@@ -251,15 +257,15 @@ export default function FadedScreen() {
           transition={{ duration: 0.85, delay: 2.7, ease: [0.16, 1, 0.3, 1] }}
           className="flex flex-col items-center gap-4 w-full"
         >
-          <p className="font-body text-[9px] tracking-[0.3em] uppercase text-white/25">
+          <p className="font-body text-[9px] tracking-[0.3em] uppercase text-white/45">
             Pass the feeling forward
           </p>
           <motion.div
             animate={{
               boxShadow: [
-                '0 0 18px rgba(196,18,48,0.2)',
-                '0 0 38px rgba(196,18,48,0.45)',
-                '0 0 18px rgba(196,18,48,0.2)',
+                '0 0 20px rgba(196,18,48,0.25)',
+                '0 0 44px rgba(196,18,48,0.6)',
+                '0 0 20px rgba(196,18,48,0.25)',
               ],
             }}
             transition={{ duration: 2.8, repeat: Infinity, ease: 'easeInOut' }}
@@ -269,7 +275,7 @@ export default function FadedScreen() {
               href="/create"
               transitionTypes={['nav-forward']}
               id="btn-faded-create"
-              className="group relative inline-flex items-center justify-center px-14 py-5 bg-crimson text-white font-body text-[12px] tracking-[0.28em] uppercase overflow-hidden transition-all duration-500 hover:bg-rose hover:scale-[1.03] rounded-full"
+              className="group relative inline-flex items-center justify-center px-16 py-6 bg-crimson text-white font-body text-[13px] font-semibold tracking-[0.3em] uppercase overflow-hidden transition-all duration-500 hover:bg-rose hover:scale-[1.04] active:scale-[0.98] rounded-full"
             >
               <span
                 className="absolute inset-0 translate-x-[-110%] group-hover:translate-x-[110%] transition-transform duration-700 skew-x-[-18deg]"
