@@ -29,6 +29,7 @@ interface MiniParticle {
   swayPhase?: number;
   swayFreq?: number;
   swayAmp?: number;
+  wishIndex?: number;
 }
 
 const MAX_PARTICLES = 9;
@@ -97,7 +98,7 @@ function createMiniParticle(
         y: h + 10 + Math.random() * h,
         vx: (Math.random() - 0.5) * 0.15,
         vy: -(Math.random() * 0.35 + 0.18),
-        size: Math.random() * 7.5 + 6,
+        size: shape === 'birthday-balloon' ? (Math.random() * 10 + 12) : (Math.random() * 7.5 + 6),
         opacity: Math.random() * 0.35 + 0.25,
         life,
         maxLife: maxLife + 100,
@@ -105,6 +106,7 @@ function createMiniParticle(
         rotationSpeed: 0,
         phase: Math.random() * Math.PI * 2,
         color,
+        wishIndex: shape === 'birthday-balloon' ? Math.floor(Math.random() * 8) : undefined,
       };
     case 'pulse':
     default:
@@ -181,6 +183,112 @@ function drawMiniParticle(
       ctx.moveTo(0, p.size * 1.15);
       const strX = Math.sin(p.life * 0.04 + p.phase) * p.size;
       ctx.quadraticCurveTo(strX * 0.3, p.size * 1.8, strX * 0.2, p.size * 2.5);
+      ctx.stroke();
+      break;
+    }
+    case 'birthday-balloon': {
+      const MINI_PALETTE = [
+        { hex: '#ff4daa', r: 255, g: 77,  b: 170 },
+        { hex: '#ffe135', r: 255, g: 225, b: 53  },
+        { hex: '#00e5ff', r: 0,   g: 229, b: 255 },
+        { hex: '#b4ff3c', r: 180, g: 255, b: 60  },
+        { hex: '#ff7c4d', r: 255, g: 124, b: 77  },
+        { hex: '#c84dff', r: 200, g: 77,  b: 255 },
+      ];
+      const MINI_WISHES = [
+        'Happy\nBDay!', 'Make a\nWish!', 'Cheers!', 'You\nRock!',
+        'Hip Hip!', 'Hooray!', 'Yay! 🎈', 'Woohoo!',
+      ];
+      const bpal = MINI_PALETTE[(p.wishIndex ?? 0) % MINI_PALETTE.length];
+      const { r: br, g: bg, b: bb } = bpal;
+      const wish = MINI_WISHES[(p.wishIndex ?? 0) % MINI_WISHES.length];
+      const wishLines = wish.split('\n');
+
+      ctx.translate(p.x, p.y);
+      const bdSway = Math.sin(p.life * 0.04 + p.phase) * 0.09;
+      ctx.rotate(bdSway);
+
+      // Balloon body path helper
+      const miniBalloonPath = () => {
+        ctx.beginPath();
+        ctx.moveTo(0, -p.size * 1.12);
+        ctx.bezierCurveTo( p.size * 1.2, -p.size * 1.12,  p.size * 1.35,  p.size * 0.14, 0,  p.size * 1.05);
+        ctx.bezierCurveTo(-p.size * 1.35,  p.size * 0.14, -p.size * 1.2, -p.size * 1.12, 0, -p.size * 1.12);
+        ctx.closePath();
+      };
+
+      // Gradient fill
+      const bodyGrad = ctx.createRadialGradient(
+        -p.size * 0.28, -p.size * 0.5, p.size * 0.02,
+         p.size * 0.05,  p.size * 0.1,  p.size * 1.5
+      );
+      const lighter = `rgba(${Math.min(255,br+75)},${Math.min(255,bg+75)},${Math.min(255,bb+75)},0.96)`;
+      const darker  = `rgba(${Math.max(0,br-50)},${Math.max(0,bg-50)},${Math.max(0,bb-50)},0.52)`;
+      bodyGrad.addColorStop(0,    lighter);
+      bodyGrad.addColorStop(0.4,  `rgba(${br},${bg},${bb},0.88)`);
+      bodyGrad.addColorStop(1,    darker);
+      ctx.fillStyle = bodyGrad;
+      miniBalloonPath();
+      ctx.fill();
+
+      // Outline
+      miniBalloonPath();
+      ctx.strokeStyle = `rgba(${br},${bg},${bb},0.5)`;
+      ctx.lineWidth = 0.7;
+      ctx.stroke();
+
+      // Primary gloss
+      ctx.beginPath();
+      ctx.ellipse(-p.size * 0.3, -p.size * 0.5, p.size * 0.22, p.size * 0.34, -Math.PI / 5, 0, Math.PI * 2);
+      ctx.fillStyle = 'rgba(255,255,255,0.30)';
+      ctx.fill();
+
+      // Specular dot
+      ctx.beginPath();
+      ctx.ellipse(-p.size * 0.17, -p.size * 0.7, p.size * 0.075, p.size * 0.11, -Math.PI / 6, 0, Math.PI * 2);
+      ctx.fillStyle = 'rgba(255,255,255,0.65)';
+      ctx.fill();
+
+      // Wish text with stroke outline
+      // Optical centre of balloon body is ~-size*0.12, not y=0
+      const textCY = -p.size * 0.12;
+      const fs = Math.max(4, p.size * 0.25);
+      const lh = fs * 1.25;
+      const totalH = (wishLines.length - 1) * lh;
+      ctx.font = `800 ${fs}px Arial, sans-serif`;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.globalAlpha = Math.max(0, alpha);
+      ctx.lineWidth = fs * 0.26;
+      ctx.lineJoin = 'round';
+      ctx.strokeStyle = `rgba(${Math.max(0,br-100)},${Math.max(0,bg-100)},${Math.max(0,bb-100)},0.65)`;
+      wishLines.forEach((ln, i) => ctx.strokeText(ln, 0, textCY - totalH / 2 + i * lh));
+      ctx.fillStyle = 'rgba(255,255,255,0.97)';
+      wishLines.forEach((ln, i) => ctx.fillText(ln, 0, textCY - totalH / 2 + i * lh));
+
+      // Knot
+      ctx.beginPath();
+      ctx.moveTo(-p.size * 0.12, p.size * 1.05);
+      ctx.quadraticCurveTo(-p.size * 0.18, p.size * 1.14, 0, p.size * 1.22);
+      ctx.quadraticCurveTo( p.size * 0.18, p.size * 1.14, p.size * 0.12, p.size * 1.05);
+      ctx.closePath();
+      ctx.fillStyle = `rgba(${Math.max(0,br-30)},${Math.max(0,bg-30)},${Math.max(0,bb-30)},0.92)`;
+      ctx.fill();
+
+      // S-curve string
+      ctx.globalAlpha = Math.max(0, alpha * 0.44);
+      const bStrSway = Math.sin(p.life * 0.038 + p.phase) * p.size * 0.95;
+      const bSLen = p.size * 2.9;
+      ctx.beginPath();
+      ctx.moveTo(0, p.size * 1.22);
+      ctx.bezierCurveTo(
+         bStrSway * 0.92, p.size * 1.22 + bSLen * 0.30,
+        -bStrSway * 0.72, p.size * 1.22 + bSLen * 0.65,
+         bStrSway * 0.26, p.size * 1.22 + bSLen
+      );
+      ctx.strokeStyle = `rgba(${br},${bg},${bb},0.5)`;
+      ctx.lineWidth = 0.6;
+      ctx.lineCap = 'round';
       ctx.stroke();
       break;
     }

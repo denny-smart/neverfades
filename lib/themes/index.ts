@@ -287,6 +287,32 @@ export const themes: FadeTheme[] = [
     signOff: 'to your abundance & success,',
     brandFooter: 'limitlessabundance',
   },
+  {
+    id: 'birthday-celebration',
+    name: 'Birthday Bash',
+    description: 'Vibrant balloons rise through a festive night sky, each carrying a birthday wish',
+    background: '#030010',
+    palette: {
+      primary: '#ff4daa',    // Electric Coral Pink
+      secondary: '#ffe135',  // Vivid Gold
+      accent: '#00e5ff',     // Neon Cyan
+    },
+    themeEngine: {
+      particleDensity: 'high',
+      motionBehavior: 'float',
+      backgroundLayer: 'animated-gradient',
+      emotionalIntensity: 'deep',
+      particleShape: 'birthday-balloon',
+    },
+    pacing: {
+      introDelay: 1.0,
+      typingSpeed: 72,
+      pauseBetweenSteps: 1200,
+    },
+    previewGradient: 'linear-gradient(135deg, #030010 0%, #16043a 50%, #08021a 100%)',
+    signOff: 'with birthday love,',
+    brandFooter: 'wishesthatneverfade',
+  },
 ];
 
 export const getTheme = (id: string): FadeTheme =>

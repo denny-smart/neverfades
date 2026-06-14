@@ -196,7 +196,7 @@ function SuccessContent() {
           style={{ maxWidth: 320 }}
         >
           Share this keepsake. It lives for exactly{' '}
-          <span className="text-white/70 font-medium">5 views</span>, then it
+          <span className="text-white/70 font-medium">3 views</span>, then it
           fades — but the feeling won&apos;t.
         </motion.p>
 
@@ -339,7 +339,7 @@ function SuccessContent() {
 
             {/* Heart gauge */}
             <div className="flex items-center gap-1.5 mb-3">
-              {Array.from({ length: 5 }).map((_, i) => {
+              {Array.from({ length: 3 }).map((_, i) => {
                 const isFelt = i < stats.view_count;
                 const isLast = i === stats.view_count - 1 && stats.view_count < stats.max_views;
                 return (

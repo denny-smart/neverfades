@@ -3,7 +3,7 @@ import { supabaseAdmin } from '@/lib/supabase/server';
 import { generateSlug } from '@/lib/utils/slug';
 import { CreateMomentInput } from '@/lib/types';
 
-const MAX_MOMENT_VIEWS = 5;
+const MAX_MOMENT_VIEWS = 3;
 
 export async function POST(req: NextRequest) {
   try {
