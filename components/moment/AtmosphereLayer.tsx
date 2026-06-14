@@ -125,9 +125,12 @@ function createParticle(
     case 'float': { // Balloons (physics-based float upwards)
       const depth = Math.random() * 0.8 + 0.6; // depth: 0.6 to 1.4
       const isBday = config.particleShape === 'birthday-balloon';
+      const isMobile = canvas.width < 768;
+      const sizeMult = isMobile ? 0.7 : 1.0; // 30% smaller on mobile
+
       // Birthday balloons are bigger so the text is legible
       const baseSize = isBday ? (Math.random() * 22 + 24) : (Math.random() * 16.5 + 13.5);
-      const size = baseSize * depth;
+      const size = baseSize * depth * sizeMult;
       // Birthday balloons have a wider speed range for natural staggering
       const vyBase = isBday ? (Math.random() * 0.45 + 0.18) : (Math.random() * 0.35 + 0.2);
       const vy = -vyBase * depth;
@@ -756,7 +759,10 @@ export default function AtmosphereLayer({
     if (!ctx) return;
 
     const colors = [palette.primary, palette.secondary, palette.accent];
-    const MAX = DENSITY_MAP[themeEngine.particleDensity];
+    const baseMax = DENSITY_MAP[themeEngine.particleDensity];
+    // Reduce density by 40% on mobile to avoid overcrowding
+    const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
+    const MAX = isMobile ? Math.floor(baseMax * 0.6) : baseMax;
     const glowMult = themeEngine.emotionalIntensity === 'deep' ? 3.8 : themeEngine.emotionalIntensity === 'medium' ? 2.4 : 1.3;
 
     const resize = () => {
