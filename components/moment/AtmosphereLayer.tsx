@@ -56,22 +56,29 @@ function createParticle(
   const maxLife = Math.random() * baseLife + 150;
 
   switch (motionBehavior) {
-    case 'fall': { // Flower petals (falling downwards with wind drift)
+    case 'fall': { // Flower petals / money notes / galaxy emojis falling downwards
       const depth = Math.random() * 1.0 + 0.5; // depth: 0.5 (far) to 1.5 (close)
-      
-      // Significantly larger size for money notes to make them readable and premium
-      const baseSize = config.particleShape === 'money' ? (Math.random() * 15 + 16) : (Math.random() * 9 + 6);
+
+      const isMoney      = config.particleShape === 'money';
+      const isGalaxyEmoji = config.particleShape === 'galaxy-emoji';
+
+      // Size: money & emoji need bigger bases so they’re legible
+      const baseSize = isMoney
+        ? (Math.random() * 15 + 16)
+        : isGalaxyEmoji
+          ? (Math.random() * 5 + 8)   // 8–13 → font = size*2.4 = 19–31px
+          : (Math.random() * 9 + 6);
       const size = baseSize * depth;
-      
+
       const vy = (Math.random() * 0.5 + 0.3) * depth;
       const vx = (Math.random() - 0.5) * 0.2 * depth;
 
-      // Ensure money notes fall all the way to the bottom by dynamically calculating required maxLife
-      const particleMaxLife = config.particleShape === 'money'
+      // Both money and galaxy-emoji must fall all the way to the bottom
+      const particleMaxLife = (isMoney || isGalaxyEmoji)
         ? (canvas.height + 70) / vy
         : maxLife;
 
-      const isMoney = config.particleShape === 'money';
+      const needs3DFlip = isMoney || isGalaxyEmoji;
 
       return {
         x: Math.random() * canvas.width,
@@ -79,7 +86,9 @@ function createParticle(
         vx,
         vy,
         size,
-        opacity: (Math.random() * 0.45 + 0.15) * (depth / 1.5),
+        opacity: isGalaxyEmoji
+          ? (Math.random() * 0.4 + 0.6) * (depth / 1.5)  // boosted floor for emoji visibility
+          : (Math.random() * 0.45 + 0.15) * (depth / 1.5),
         life: 0,
         maxLife: particleMaxLife,
         rotation: Math.random() * Math.PI * 2,
@@ -89,13 +98,14 @@ function createParticle(
         windPhase: Math.random() * Math.PI * 2,
         windFreq: Math.random() * 0.015 + 0.005,
         windAmp: Math.random() * 1.8 + 0.6,
-        pitchPhase: isMoney ? Math.random() * Math.PI * 2 : undefined,
-        pitchSpeed: isMoney ? Math.random() * 0.03 + 0.015 : undefined,
-        rollPhase: isMoney ? Math.random() * Math.PI * 2 : undefined,
-        rollSpeed: isMoney ? Math.random() * 0.02 + 0.01 : undefined,
-        swayPhase: isMoney ? Math.random() * Math.PI * 2 : undefined,
-        swayFreq: isMoney ? Math.random() * 0.01 + 0.005 : undefined,
-        swayAmp: isMoney ? Math.random() * 1.5 + 1.0 : undefined,
+        // Pitch/roll/sway shared by money AND galaxy-emoji for 3-D tumble + aerodynamic glide
+        pitchPhase: needs3DFlip ? Math.random() * Math.PI * 2 : undefined,
+        pitchSpeed: needs3DFlip ? Math.random() * 0.03 + 0.015 : undefined,
+        rollPhase:  needs3DFlip ? Math.random() * Math.PI * 2 : undefined,
+        rollSpeed:  needs3DFlip ? Math.random() * 0.02 + 0.01  : undefined,
+        swayPhase:  needs3DFlip ? Math.random() * Math.PI * 2 : undefined,
+        swayFreq:   needs3DFlip ? Math.random() * 0.01 + 0.005 : undefined,
+        swayAmp:    needs3DFlip ? Math.random() * 1.5 + 1.0    : undefined,
       };
     }
 
@@ -724,59 +734,49 @@ function drawParticle(
       const GALAXY_EMOJIS = ['🌙', '⭐', '💫', '✨', '🌟', '💜', '🪐', '🌌', '💙', '🌠'];
       // windPhase is a stable per-particle seed (0 – 2π)
       const seed = p.windPhase ?? 0;
-      // True 50 / 50 split: lower half of the 0–2π range → emoji
+      // 50/50 split: lower half of 0–2π → emoji, upper half → glowing dot
       const isEmoji = seed < Math.PI;
 
-      // Smooth bell-curve fade over full lifetime
-      const bellFade = Math.sin(lifeRatio * Math.PI);
-      // Soft entry fade-in over first 60 frames
-      const entryFade = Math.min(1, p.life / 60);
+      const fadeAlpha = p.opacity * (1 - lifeRatio);
 
       ctx.save();
+      ctx.translate(p.x, p.y);
+      ctx.rotate(p.rotation ?? 0);
+
+      // ── 3-D pitch / roll flip — exact same mechanics as money ────────────
+      let flipFactor = 1;
+      if (p.pitchPhase !== undefined && p.pitchSpeed !== undefined) {
+        const pitch  = p.life * p.pitchSpeed + p.pitchPhase;
+        const scaleY = Math.sin(pitch);
+        const roll   = p.life * (p.rollSpeed ?? 0.02) + (p.rollPhase ?? 0);
+        const scaleX = Math.cos(roll);
+        ctx.scale(scaleX, scaleY);
+        flipFactor = Math.abs(scaleY);
+      }
+
+      // Alpha: visible at face-on, semi-transparent at edge-on (just like money)
+      const displayAlpha = fadeAlpha * (0.25 + 0.75 * flipFactor);
+      ctx.globalAlpha = Math.max(0, displayAlpha);
 
       if (isEmoji) {
-        const idx = Math.floor((seed / Math.PI) * GALAXY_EMOJIS.length) % GALAXY_EMOJIS.length;
+        const idx   = Math.floor((seed / Math.PI) * GALAXY_EMOJIS.length) % GALAXY_EMOJIS.length;
         const emoji = GALAXY_EMOJIS[Math.abs(idx)];
-
-        // Breathing scale: gentle inhale / exhale unique to each particle
-        const breathFreq  = 0.022 + (idx % 5) * 0.003;
-        const breathScale = 1 + 0.12 * Math.sin(p.life * breathFreq + (p.pulsePhase ?? 0));
-
-        // Spin: slow, direction alternates by seed, speed varies by particle
-        const spinDir   = seed > Math.PI * 0.5 ? 1 : -1;
-        const spinSpeed = 0.004 + (seed % 0.8) * 0.006; // 0.004 – 0.01 rad/frame
-        const angle     = p.life * spinSpeed * spinDir;
-
-        // Strong visible alpha — emojis should never fade below 40% of their opacity
-        const alpha = p.opacity * Math.max(0.4, bellFade) * entryFade;
-
-        ctx.globalAlpha = Math.min(1, Math.max(0, alpha));
-        ctx.translate(p.x, p.y);
-        ctx.rotate(angle);
-        ctx.scale(breathScale, breathScale);
-
         const fontSize = p.size * 2.4;
-        ctx.font = `${fontSize}px serif`;
-        ctx.textAlign    = 'center';
-        ctx.textBaseline = 'middle';
-
-        // Coloured glow halo — draw text twice: blurred glow pass + crisp top pass
+        ctx.font          = `${fontSize}px serif`;
+        ctx.textAlign     = 'center';
+        ctx.textBaseline  = 'middle';
+        // Two-pass render: blurred glow + crisp top (same premium technique as money)
         ctx.shadowBlur  = p.size * 4 * glowMult;
         ctx.shadowColor = p.color;
         ctx.fillText(emoji, 0, 0); // glow pass
         ctx.shadowBlur = 0;
-        ctx.fillText(emoji, 0, 0); // crisp pass on top
+        ctx.fillText(emoji, 0, 0); // crisp pass
       } else {
-        // Classic twinkling glowing dot
-        const twinkle = p.pulsePhase !== undefined
-          ? Math.sin(p.life * 0.045 + p.pulsePhase)
-          : 1;
-        const alpha = p.opacity * bellFade * (0.55 + 0.45 * twinkle) * entryFade;
-        ctx.globalAlpha = Math.max(0, alpha);
+        // Glowing dot companion particle
         ctx.shadowBlur  = p.size * 2.5 * glowMult;
         ctx.shadowColor = p.color;
         ctx.beginPath();
-        ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+        ctx.arc(0, 0, p.size, 0, Math.PI * 2);
         ctx.fillStyle = p.color;
         ctx.fill();
       }
@@ -849,7 +849,8 @@ export default function AtmosphereLayer({
       const p = createParticle(canvas, themeEngine, colors);
       // Stagger position first, then align life proportionally to its starting Y coordinate
       p.y = Math.random() * canvas.height;
-      if (themeEngine.particleShape === 'money' && themeEngine.motionBehavior === 'fall') {
+      const needsLifeStagger = (themeEngine.particleShape === 'money' || themeEngine.particleShape === 'galaxy-emoji') && themeEngine.motionBehavior === 'fall';
+      if (needsLifeStagger) {
         p.life = ((p.y + 30) / (canvas.height + 70)) * p.maxLife;
       } else {
         p.life = Math.random() * p.maxLife;
@@ -865,8 +866,8 @@ export default function AtmosphereLayer({
         
         // Update horizontal position using organic wind sines or spring-sways
         if (themeEngine.motionBehavior === 'fall' && p.windPhase !== undefined && p.windFreq !== undefined && p.windAmp !== undefined) {
-          if (themeEngine.particleShape === 'money' && p.swayPhase !== undefined && p.swayFreq !== undefined && p.swayAmp !== undefined) {
-            // Elegant aerodynamic leaf-fall glide for banknotes
+          if ((themeEngine.particleShape === 'money' || themeEngine.particleShape === 'galaxy-emoji') && p.swayPhase !== undefined && p.swayFreq !== undefined && p.swayAmp !== undefined) {
+            // Aerodynamic leaf-fall glide (shared by money and galaxy-emoji)
             p.x += p.vx + Math.sin(p.life * p.swayFreq + p.swayPhase) * p.swayAmp * p.depth * 0.7;
             p.y += p.vy * (1 + 0.15 * Math.sin(p.life * p.swayFreq * 2 + p.swayPhase));
           } else {
@@ -902,7 +903,7 @@ export default function AtmosphereLayer({
         }
 
         if (p.rotation !== undefined && p.rotationSpeed !== undefined && themeEngine.motionBehavior !== 'float') {
-          if (themeEngine.particleShape === 'money') {
+          if (themeEngine.particleShape === 'money' || themeEngine.particleShape === 'galaxy-emoji') {
             p.rotation += p.rotationSpeed * 0.4;
           } else {
             p.rotation += p.rotationSpeed;

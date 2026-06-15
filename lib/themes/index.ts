@@ -117,7 +117,7 @@ export const themes: FadeTheme[] = [
     },
     themeEngine: {
       particleDensity: 'high',
-      motionBehavior: 'drift',
+      motionBehavior: 'fall',
       backgroundLayer: 'animated-gradient',
       emotionalIntensity: 'deep',
       particleShape: 'galaxy-emoji',
