@@ -392,7 +392,7 @@ function SuccessContent() {
           className="font-body text-[9px] text-white/20 italic text-center leading-normal mb-8"
           style={{ maxWidth: 280 }}
         >
-          Once opened {stats?.max_views ?? 5} times, the link dissolves permanently. There is no recovery.
+          Once opened {stats?.max_views ?? 3} times, the link dissolves permanently. There is no recovery.
         </motion.p>
 
         {/* ── Create another ── */}

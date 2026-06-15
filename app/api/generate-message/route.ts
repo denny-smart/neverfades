@@ -39,7 +39,7 @@ export async function POST(req: Request) {
     // a specific length — LLMs cannot reliably count characters while generating
     // and will produce mid-sentence truncations when they try to comply.
     // Instead, we ask for a short, complete piece and trim server-side.
-    const prompt = `You are a poetic and emotionally intelligent writer for an app called "NeverFades" — a platform where people send keepsake messages that fade after 5 views.
+    const prompt = `You are a poetic and emotionally intelligent writer for an app called "NeverFades" — a platform where people send keepsake messages that fade after 3 views.
 
 Write a short, complete, and deeply felt keepsake message using the details below:
 - For: ${partnerName}

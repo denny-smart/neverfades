@@ -167,7 +167,7 @@ export default function HeroSection() {
             transition={{ duration: 1, delay: 2.8 }}
             className="font-body text-[10px] tracking-[0.25em] uppercase text-ash-500"
           >
-            Each link fades after 5 views. No exceptions.
+            Each link fades after 3 views. No exceptions.
           </motion.p>
         </motion.div>
       </div>

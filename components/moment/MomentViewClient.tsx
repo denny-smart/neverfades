@@ -8,7 +8,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 
 // ── Per-load view token ───────────────────────────────────────────────────
 // A new UUID is generated on every mount (i.e. every page load / reload).
-// This means each visit — including reloads — consumes one of the 5 views.
+// This means each visit — including reloads — consumes one of the 3 views.
 function generateLoadToken(): string {
   if (typeof window === 'undefined') return '';
   if (typeof crypto !== 'undefined' && crypto.randomUUID) {
