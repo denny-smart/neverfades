@@ -79,7 +79,7 @@ export default function HeroSection() {
           transition={{ duration: 0.9, delay: 0.6, ease: [0.16, 1, 0.3, 1] }}
           className="font-body text-xs tracking-[0.3em] uppercase text-crimson mb-8"
         >
-          lovethatneverfades
+          momentsthatneverfade
         </motion.p>
 
         {/* Headline */}

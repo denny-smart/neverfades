@@ -196,7 +196,7 @@ export default function FadedScreen() {
           transition={{ duration: 0.7, delay: 0.4 }}
           className="font-body text-[9px] tracking-[0.42em] uppercase text-crimson mb-7"
         >
-          lovethatneverfades
+          momentsthatneverfade
         </motion.p>
 
         {/* Broken heart */}

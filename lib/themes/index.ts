@@ -25,7 +25,7 @@ export const themes: FadeTheme[] = [
     },
     previewGradient: 'linear-gradient(135deg, #0d0508 0%, #2d0a15 50%, #1a0510 100%)',
     signOff: 'with love,',
-    brandFooter: 'lovethatneverfades',
+    brandFooter: 'momentsthatneverfade',
   },
   {
     id: 'magic-stars',

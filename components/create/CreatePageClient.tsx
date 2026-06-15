@@ -68,7 +68,7 @@ export default function CreatePageClient() {
           className="font-body text-[9px] tracking-[0.4em] uppercase transition-colors duration-1000"
           style={{ color: theme.palette.primary }}
         >
-          lovethatneverfades
+          momentsthatneverfade
         </p>
       </motion.div>
 

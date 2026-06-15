@@ -143,7 +143,7 @@ function SuccessContent() {
           className="font-body text-[9px] tracking-[0.42em] uppercase mb-8"
           style={{ color: theme.palette.primary }}
         >
-          lovethatneverfades
+          momentsthatneverfade
         </motion.p>
 
         {/* ── Theme badge ── */}
