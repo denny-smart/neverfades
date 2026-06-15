@@ -73,12 +73,12 @@ function createParticle(
             : (Math.random() * 9 + 6);
       const size = baseSize * depth;
 
-      // Bears fall gently — slower speed range so they drift down visibly
+      // Bears fall fast — energetic cascade like plush toys tumbling down
       const vyRange = isBear
-        ? { min: 0.18, range: 0.32 }   // 0.18–0.50 × depth (slower, drifty)
+        ? { min: 0.55, range: 0.55 }   // 0.55–1.10 × depth (fast, lively)
         : { min: 0.30, range: 0.50 };  // original speed for other shapes
       const vy = (Math.random() * vyRange.range + vyRange.min) * depth;
-      const vx = (Math.random() - 0.5) * (isBear ? 0.15 : 0.2) * depth;
+      const vx = (Math.random() - 0.5) * (isBear ? 0.25 : 0.2) * depth;
 
       // Bears (like money/emoji) must travel the full screen height before dying
       const particleMaxLife = (isMoney || isGalaxyEmoji || isBear)
@@ -101,7 +101,7 @@ function createParticle(
         life: 0,
         maxLife: particleMaxLife,
         rotation: Math.random() * Math.PI * 2,
-        rotationSpeed: (Math.random() - 0.5) * (isBear ? 0.012 : 0.02) * (1 / depth),
+        rotationSpeed: (Math.random() - 0.5) * (isBear ? 0.028 : 0.02) * (1 / depth),
         color,
         depth,
         windPhase: Math.random() * Math.PI * 2,
