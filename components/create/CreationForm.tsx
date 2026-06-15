@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useRouter } from 'next/navigation';
-import ThemeSelector from './ThemeSelector';
+import ThemeSelector, { THEME_META } from './ThemeSelector';
 import { themes, getTheme } from '@/lib/themes';
 
 interface CreationFormProps {
@@ -454,8 +454,9 @@ export default function CreationForm({ activeThemeId, onThemeChange }: CreationF
 
                 <div className="w-full border-t border-white/5 pt-4 flex flex-col items-center gap-1">
                   <span className="font-body text-[8px] tracking-[0.3em] uppercase text-white/28">Atmosphere</span>
-                  <p className="font-display text-base font-light" style={{ color: theme.palette.accent }}>
-                    {themes.find(t => t.id === form.theme_id)?.name}
+                  <p className="font-display text-base font-light flex items-center gap-1.5" style={{ color: theme.palette.accent }}>
+                    <span className="text-base leading-none">{THEME_META[form.theme_id]?.emoji ?? '🎨'}</span>
+                    {THEME_META[form.theme_id]?.label ?? themes.find(t => t.id === form.theme_id)?.name}
                   </p>
                 </div>
               </div>
