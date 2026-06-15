@@ -101,7 +101,12 @@ function createParticle(
 
     case 'drift': { // Twinkling stars or drifted cosmic elements
       const depth = Math.random() * 0.8 + 0.4;
-      const size = (Math.random() * 4.5 + 1.8) * depth;
+      // Galaxy-emoji particles need a larger base size so emojis are legible
+      const isGalaxyEmoji = config.particleShape === 'galaxy-emoji';
+      const rawSize = isGalaxyEmoji
+        ? (Math.random() * 8 + 8) * depth   // 8–16 → rendered at size*2.4 = 19–38px
+        : (Math.random() * 4.5 + 1.8) * depth;
+      const size = rawSize;
       const vy = (Math.random() * 0.35 + 0.1) * depth;
       const vx = (Math.random() - 0.5) * 0.25 * depth;
       return {
@@ -110,7 +115,9 @@ function createParticle(
         vx,
         vy,
         size,
-        opacity: (Math.random() * 0.8 + 0.2) * (depth / 1.2),
+        opacity: isGalaxyEmoji
+          ? (Math.random() * 0.5 + 0.55) * (depth / 1.2)  // floor raised for visibility
+          : (Math.random() * 0.8 + 0.2) * (depth / 1.2),
         life: 0,
         maxLife,
         pulsePhase: Math.random() * Math.PI * 2,
@@ -714,36 +721,59 @@ function drawParticle(
     }
 
     case 'galaxy-emoji': {
-      // ~40% of particles are cute emojis, rest are classic glowing circles
       const GALAXY_EMOJIS = ['🌙', '⭐', '💫', '✨', '🌟', '💜', '🪐', '🌌', '💙', '🌠'];
-      // Use windPhase as stable seed so each particle keeps the same emoji
+      // windPhase is a stable per-particle seed (0 – 2π)
       const seed = p.windPhase ?? 0;
-      const isEmoji = seed % (Math.PI * 2) < Math.PI * 0.8; // ~40% emojis
+      // True 50 / 50 split: lower half of the 0–2π range → emoji
+      const isEmoji = seed < Math.PI;
 
-      const twinkle = p.pulsePhase !== undefined
-        ? Math.sin(p.life * 0.045 + p.pulsePhase)
-        : 1;
-      const alpha = p.opacity * Math.sin(lifeRatio * Math.PI) * (0.55 + 0.45 * twinkle);
+      // Smooth bell-curve fade over full lifetime
+      const bellFade = Math.sin(lifeRatio * Math.PI);
+      // Soft entry fade-in over first 60 frames
+      const entryFade = Math.min(1, p.life / 60);
 
       ctx.save();
-      ctx.globalAlpha = Math.max(0, alpha);
 
       if (isEmoji) {
-        const idx = Math.floor(seed * GALAXY_EMOJIS.length / (Math.PI * 2)) % GALAXY_EMOJIS.length;
+        const idx = Math.floor((seed / Math.PI) * GALAXY_EMOJIS.length) % GALAXY_EMOJIS.length;
         const emoji = GALAXY_EMOJIS[Math.abs(idx)];
-        // Gentle spin
+
+        // Breathing scale: gentle inhale / exhale unique to each particle
+        const breathFreq  = 0.022 + (idx % 5) * 0.003;
+        const breathScale = 1 + 0.12 * Math.sin(p.life * breathFreq + (p.pulsePhase ?? 0));
+
+        // Spin: slow, direction alternates by seed, speed varies by particle
+        const spinDir   = seed > Math.PI * 0.5 ? 1 : -1;
+        const spinSpeed = 0.004 + (seed % 0.8) * 0.006; // 0.004 – 0.01 rad/frame
+        const angle     = p.life * spinSpeed * spinDir;
+
+        // Strong visible alpha — emojis should never fade below 40% of their opacity
+        const alpha = p.opacity * Math.max(0.4, bellFade) * entryFade;
+
+        ctx.globalAlpha = Math.min(1, Math.max(0, alpha));
         ctx.translate(p.x, p.y);
-        ctx.rotate(p.life * 0.008 * (seed > Math.PI ? 1 : -1));
-        ctx.font = `${p.size * 2.2}px serif`;
+        ctx.rotate(angle);
+        ctx.scale(breathScale, breathScale);
+
+        const fontSize = p.size * 2.4;
+        ctx.font = `${fontSize}px serif`;
         ctx.textAlign    = 'center';
         ctx.textBaseline = 'middle';
-        // Soft glow halo behind emoji
-        ctx.shadowBlur  = p.size * 3 * glowMult;
+
+        // Coloured glow halo — draw text twice: blurred glow pass + crisp top pass
+        ctx.shadowBlur  = p.size * 4 * glowMult;
         ctx.shadowColor = p.color;
-        ctx.fillText(emoji, 0, 0);
+        ctx.fillText(emoji, 0, 0); // glow pass
+        ctx.shadowBlur = 0;
+        ctx.fillText(emoji, 0, 0); // crisp pass on top
       } else {
-        // Classic glowing dot
-        ctx.shadowBlur  = p.size * 2 * glowMult;
+        // Classic twinkling glowing dot
+        const twinkle = p.pulsePhase !== undefined
+          ? Math.sin(p.life * 0.045 + p.pulsePhase)
+          : 1;
+        const alpha = p.opacity * bellFade * (0.55 + 0.45 * twinkle) * entryFade;
+        ctx.globalAlpha = Math.max(0, alpha);
+        ctx.shadowBlur  = p.size * 2.5 * glowMult;
         ctx.shadowColor = p.color;
         ctx.beginPath();
         ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
