@@ -102,14 +102,6 @@ const CATEGORIES: Category[] = [
     ],
   },
   {
-    emoji: '🕯️',
-    weight: 3,
-    keywords: [
-      /\b(candle|candlelight|soft\s*light|glow|flicker|warmth|cozy|intimate)\b/i,
-      /\b(remember|memory|memories|nostalgia|past|time|moment|moments)\b/i,
-    ],
-  },
-  {
     emoji: '🌸',
     weight: 3,
     keywords: [
