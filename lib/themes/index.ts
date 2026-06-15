@@ -134,18 +134,18 @@ export const themes: FadeTheme[] = [
   {
     id: 'teddy-love',
     name: 'Teddy Love',
-    description: 'Soft bears tumbling through a warm embrace',
-    background: '#0d0805',
+    description: 'Red love bears tumbling through a crimson embrace',
+    background: '#0a0005',
     palette: {
-      primary:   '#c4874a',
-      secondary: '#8b5e34',
-      accent:    '#f4c0a0',
+      primary:   '#d42040',
+      secondary: '#a01030',
+      accent:    '#ff6080',
     },
     themeEngine: {
       particleDensity:    'medium',
       motionBehavior:     'fall',
       backgroundLayer:    'gradient',
-      emotionalIntensity: 'soft',
+      emotionalIntensity: 'medium',
       particleShape:      'bear',
     },
     pacing: {
@@ -153,8 +153,8 @@ export const themes: FadeTheme[] = [
       typingSpeed:       80,
       pauseBetweenSteps: 1500,
     },
-    previewGradient: 'linear-gradient(135deg, #0d0805 0%, #1f1008 50%, #160b05 100%)',
-    signOff: 'with bear hugs,',
+    previewGradient: 'linear-gradient(135deg, #0a0005 0%, #280010 50%, #180008 100%)',
+    signOff: 'with bear hugs & love,',
     brandFooter: 'cuddlesthemoment',
   },
   {

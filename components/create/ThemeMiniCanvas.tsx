@@ -295,64 +295,95 @@ function drawMiniParticle(
     case 'bear': {
       ctx.translate(p.x, p.y);
       ctx.rotate(p.rotation);
-      
-      const s = p.size;
-      const bodyColor = p.color;
-      // Inlined helper or direct color representation
-      const innerColor = 'rgba(244, 192, 160, 0.85)';
-      const darkColor = 'rgba(59, 31, 10, 0.9)';
 
-      // Left ear
+      const s = p.size;
+      const bodyColor  = p.color;                   // red from palette
+      const bellyColor = 'rgba(255,143,168,0.90)';  // rosy pink belly
+      const darkColor  = 'rgba(26,0,8,0.95)';       // near-black for features
+      const heartColor = '#ff2255';
+
+      // ── Left ear ──────────────────────────────────────────────
       ctx.beginPath();
       ctx.arc(-s * 0.72, -s * 0.82, s * 0.42, 0, Math.PI * 2);
       ctx.fillStyle = bodyColor;
       ctx.fill();
-      // Left ear inner
       ctx.beginPath();
       ctx.arc(-s * 0.72, -s * 0.82, s * 0.22, 0, Math.PI * 2);
-      ctx.fillStyle = innerColor;
+      ctx.fillStyle = bellyColor;
       ctx.fill();
 
-      // Right ear
+      // ── Right ear ─────────────────────────────────────────────
       ctx.beginPath();
       ctx.arc(s * 0.72, -s * 0.82, s * 0.42, 0, Math.PI * 2);
       ctx.fillStyle = bodyColor;
       ctx.fill();
-      // Right ear inner
       ctx.beginPath();
       ctx.arc(s * 0.72, -s * 0.82, s * 0.22, 0, Math.PI * 2);
-      ctx.fillStyle = innerColor;
+      ctx.fillStyle = bellyColor;
       ctx.fill();
 
-      // Head
+      // ── Head ──────────────────────────────────────────────────
       ctx.beginPath();
       ctx.arc(0, 0, s, 0, Math.PI * 2);
       ctx.fillStyle = bodyColor;
       ctx.fill();
 
-      // Muzzle
+      // ── Muzzle ────────────────────────────────────────────────
       ctx.beginPath();
-      ctx.ellipse(0, s * 0.32, s * 0.48, s * 0.34, 0, 0, Math.PI * 2);
-      ctx.fillStyle = innerColor;
+      ctx.ellipse(0, s * 0.32, s * 0.50, s * 0.36, 0, 0, Math.PI * 2);
+      ctx.fillStyle = bellyColor;
       ctx.fill();
 
-      // Left eye
+      // ── Left eye ──────────────────────────────────────────────
       ctx.beginPath();
-      ctx.arc(-s * 0.32, -s * 0.18, s * 0.12, 0, Math.PI * 2);
+      ctx.arc(-s * 0.32, -s * 0.18, s * 0.14, 0, Math.PI * 2);
+      ctx.fillStyle = darkColor;
+      ctx.fill();
+      ctx.beginPath();
+      ctx.arc(-s * 0.26, -s * 0.24, s * 0.055, 0, Math.PI * 2);
+      ctx.fillStyle = 'rgba(255,255,255,0.9)';
+      ctx.fill();
+
+      // ── Right eye ─────────────────────────────────────────────
+      ctx.beginPath();
+      ctx.arc(s * 0.32, -s * 0.18, s * 0.14, 0, Math.PI * 2);
+      ctx.fillStyle = darkColor;
+      ctx.fill();
+      ctx.beginPath();
+      ctx.arc(s * 0.38, -s * 0.24, s * 0.055, 0, Math.PI * 2);
+      ctx.fillStyle = 'rgba(255,255,255,0.9)';
+      ctx.fill();
+
+      // ── Nose ──────────────────────────────────────────────────
+      ctx.beginPath();
+      ctx.ellipse(0, s * 0.18, s * 0.15, s * 0.11, 0, 0, Math.PI * 2);
       ctx.fillStyle = darkColor;
       ctx.fill();
 
-      // Right eye
+      // ── Smile ─────────────────────────────────────────────────
       ctx.beginPath();
-      ctx.arc(s * 0.32, -s * 0.18, s * 0.12, 0, Math.PI * 2);
-      ctx.fillStyle = darkColor;
-      ctx.fill();
+      ctx.arc(0, s * 0.26, s * 0.22, 0.18, Math.PI - 0.18);
+      ctx.strokeStyle = darkColor;
+      ctx.lineWidth = s * 0.08;
+      ctx.lineCap = 'round';
+      ctx.stroke();
 
-      // Nose
-      ctx.beginPath();
-      ctx.ellipse(0, s * 0.2, s * 0.14, s * 0.1, 0, 0, Math.PI * 2);
-      ctx.fillStyle = darkColor;
-      ctx.fill();
+      // ── Love heart on forehead ────────────────────────────────
+      {
+        const hx = 0;
+        const hy = -s * 0.52;
+        const hr = s * 0.18;
+        ctx.shadowBlur  = s * 1.4;
+        ctx.shadowColor = heartColor;
+        ctx.beginPath();
+        ctx.moveTo(hx, hy + hr * 0.55);
+        ctx.bezierCurveTo(hx - hr * 1.05, hy - hr * 0.6,  hx - hr * 2.1, hy + hr * 0.4,  hx, hy + hr * 1.8);
+        ctx.bezierCurveTo(hx + hr * 2.1,  hy + hr * 0.4,  hx + hr * 1.05, hy - hr * 0.6, hx, hy + hr * 0.55);
+        ctx.closePath();
+        ctx.fillStyle = heartColor;
+        ctx.fill();
+        ctx.shadowBlur = 0;
+      }
 
       break;
     }
