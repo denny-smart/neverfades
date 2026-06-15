@@ -120,7 +120,7 @@ export const themes: FadeTheme[] = [
       motionBehavior: 'drift',
       backgroundLayer: 'animated-gradient',
       emotionalIntensity: 'deep',
-      particleShape: 'circle',
+      particleShape: 'galaxy-emoji',
     },
     pacing: {
       introDelay: 1.1,

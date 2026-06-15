@@ -713,6 +713,48 @@ function drawParticle(
       break;
     }
 
+    case 'galaxy-emoji': {
+      // ~40% of particles are cute emojis, rest are classic glowing circles
+      const GALAXY_EMOJIS = ['🌙', '⭐', '💫', '✨', '🌟', '💜', '🪐', '🌌', '💙', '🌠'];
+      // Use windPhase as stable seed so each particle keeps the same emoji
+      const seed = p.windPhase ?? 0;
+      const isEmoji = seed % (Math.PI * 2) < Math.PI * 0.8; // ~40% emojis
+
+      const twinkle = p.pulsePhase !== undefined
+        ? Math.sin(p.life * 0.045 + p.pulsePhase)
+        : 1;
+      const alpha = p.opacity * Math.sin(lifeRatio * Math.PI) * (0.55 + 0.45 * twinkle);
+
+      ctx.save();
+      ctx.globalAlpha = Math.max(0, alpha);
+
+      if (isEmoji) {
+        const idx = Math.floor(seed * GALAXY_EMOJIS.length / (Math.PI * 2)) % GALAXY_EMOJIS.length;
+        const emoji = GALAXY_EMOJIS[Math.abs(idx)];
+        // Gentle spin
+        ctx.translate(p.x, p.y);
+        ctx.rotate(p.life * 0.008 * (seed > Math.PI ? 1 : -1));
+        ctx.font = `${p.size * 2.2}px serif`;
+        ctx.textAlign    = 'center';
+        ctx.textBaseline = 'middle';
+        // Soft glow halo behind emoji
+        ctx.shadowBlur  = p.size * 3 * glowMult;
+        ctx.shadowColor = p.color;
+        ctx.fillText(emoji, 0, 0);
+      } else {
+        // Classic glowing dot
+        ctx.shadowBlur  = p.size * 2 * glowMult;
+        ctx.shadowColor = p.color;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+        ctx.fillStyle = p.color;
+        ctx.fill();
+      }
+
+      ctx.restore();
+      break;
+    }
+
     case 'circle':
     default: {
       const fadeAlpha = p.opacity * Math.sin(lifeRatio * Math.PI);
