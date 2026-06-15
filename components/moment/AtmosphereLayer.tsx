@@ -56,26 +56,33 @@ function createParticle(
   const maxLife = Math.random() * baseLife + 150;
 
   switch (motionBehavior) {
-    case 'fall': { // Flower petals / money notes / galaxy emojis falling downwards
+    case 'fall': { // Flower petals / money notes / galaxy emojis / bears falling downwards
       const depth = Math.random() * 1.0 + 0.5; // depth: 0.5 (far) to 1.5 (close)
 
-      const isMoney      = config.particleShape === 'money';
+      const isMoney       = config.particleShape === 'money';
       const isGalaxyEmoji = config.particleShape === 'galaxy-emoji';
+      const isBear        = config.particleShape === 'bear';
 
-      // Size: money & emoji need bigger bases so they’re legible
+      // Bears get a very wide size range — some tiny, some large — for natural depth variety
       const baseSize = isMoney
         ? (Math.random() * 15 + 16)
         : isGalaxyEmoji
           ? (Math.random() * 5 + 8)   // 8–13 → font = size*2.4 = 19–31px
-          : (Math.random() * 9 + 6);
+          : isBear
+            ? (Math.random() * 22 + 4)  // 4–26 px: tiny distant bears to big close ones
+            : (Math.random() * 9 + 6);
       const size = baseSize * depth;
 
-      const vy = (Math.random() * 0.5 + 0.3) * depth;
-      const vx = (Math.random() - 0.5) * 0.2 * depth;
+      // Bears fall gently — slower speed range so they drift down visibly
+      const vyRange = isBear
+        ? { min: 0.18, range: 0.32 }   // 0.18–0.50 × depth (slower, drifty)
+        : { min: 0.30, range: 0.50 };  // original speed for other shapes
+      const vy = (Math.random() * vyRange.range + vyRange.min) * depth;
+      const vx = (Math.random() - 0.5) * (isBear ? 0.15 : 0.2) * depth;
 
-      // Both money and galaxy-emoji must fall all the way to the bottom
-      const particleMaxLife = (isMoney || isGalaxyEmoji)
-        ? (canvas.height + 70) / vy
+      // Bears (like money/emoji) must travel the full screen height before dying
+      const particleMaxLife = (isMoney || isGalaxyEmoji || isBear)
+        ? (canvas.height + 80) / vy
         : maxLife;
 
       const needs3DFlip = isMoney || isGalaxyEmoji;
@@ -87,17 +94,19 @@ function createParticle(
         vy,
         size,
         opacity: isGalaxyEmoji
-          ? (Math.random() * 0.4 + 0.6) * (depth / 1.5)  // boosted floor for emoji visibility
-          : (Math.random() * 0.45 + 0.15) * (depth / 1.5),
+          ? (Math.random() * 0.4 + 0.6) * (depth / 1.5)
+          : isBear
+            ? (Math.random() * 0.25 + 0.65) * (depth / 1.5)  // bears are vivid and visible
+            : (Math.random() * 0.45 + 0.15) * (depth / 1.5),
         life: 0,
         maxLife: particleMaxLife,
         rotation: Math.random() * Math.PI * 2,
-        rotationSpeed: (Math.random() - 0.5) * 0.02 * (1 / depth),
+        rotationSpeed: (Math.random() - 0.5) * (isBear ? 0.012 : 0.02) * (1 / depth),
         color,
         depth,
         windPhase: Math.random() * Math.PI * 2,
         windFreq: Math.random() * 0.015 + 0.005,
-        windAmp: Math.random() * 1.8 + 0.6,
+        windAmp: Math.random() * (isBear ? 1.2 : 1.8) + 0.6,
         // Pitch/roll/sway shared by money AND galaxy-emoji for 3-D tumble + aerodynamic glide
         pitchPhase: needs3DFlip ? Math.random() * Math.PI * 2 : undefined,
         pitchSpeed: needs3DFlip ? Math.random() * 0.03 + 0.015 : undefined,
@@ -494,7 +503,10 @@ function drawParticle(
     }
 
     case 'bear': {
-      const fadeAlpha = p.opacity * (1 - lifeRatio);
+      // Quick fade-in as bear appears at top (first 8% of life), then smooth fade-out to bottom
+      const entryFade = Math.min(1, lifeRatio / 0.08);
+      const exitFade  = 1 - lifeRatio;
+      const fadeAlpha = p.opacity * entryFade * exitFade;
       ctx.save();
       ctx.translate(p.x, p.y);
       ctx.rotate(p.rotation ?? 0);
@@ -873,7 +885,7 @@ export default function AtmosphereLayer({
       const p = createParticle(canvas, themeEngine, colors);
       // Stagger position first, then align life proportionally to its starting Y coordinate
       p.y = Math.random() * canvas.height;
-      const needsLifeStagger = (themeEngine.particleShape === 'money' || themeEngine.particleShape === 'galaxy-emoji') && themeEngine.motionBehavior === 'fall';
+      const needsLifeStagger = (themeEngine.particleShape === 'money' || themeEngine.particleShape === 'galaxy-emoji' || themeEngine.particleShape === 'bear') && themeEngine.motionBehavior === 'fall';
       if (needsLifeStagger) {
         p.life = ((p.y + 30) / (canvas.height + 70)) * p.maxLife;
       } else {
